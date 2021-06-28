@@ -1,28 +1,20 @@
 import * as React from 'react';
+import Button from 'react-bootstrap/Button';
+import { LinkContainer } from 'react-router-bootstrap';
 import styled from 'styled-components/macro';
-import { ReactComponent as DocumentationIcon } from './assets/documentation-icon.svg';
-import { ReactComponent as GithubIcon } from './assets/github-icon.svg';
 
 export function Nav() {
   return (
     <Wrapper>
-      <Item
-        href="https://cansahin.gitbook.io/react-boilerplate-cra-template/"
-        target="_blank"
-        title="Documentation Page"
-        rel="noopener noreferrer"
-      >
-        <DocumentationIcon />
-        Documentation
+      <Item>
+        <LinkContainer to="/new">
+          <Button variant="primary">Get Started</Button>
+        </LinkContainer>
       </Item>
-      <Item
-        href="https://github.com/react-boilerplate/react-boilerplate-cra-template"
-        target="_blank"
-        title="Github Page"
-        rel="noopener noreferrer"
-      >
-        <GithubIcon />
-        Github
+      <Item>
+        <LinkContainer to="/login">
+          <Button variant="light">Sign In</Button>
+        </LinkContainer>
       </Item>
     </Wrapper>
   );
@@ -33,12 +25,13 @@ const Wrapper = styled.nav`
   margin-right: -1rem;
 `;
 
-const Item = styled.a`
+const Item = styled.div`
   color: ${p => p.theme.primary};
   cursor: pointer;
+  margin: 0px;
   text-decoration: none;
   display: flex;
-  padding: 0.25rem 1rem;
+  margin: 0.25rem;
   font-size: 0.875rem;
   font-weight: 500;
   align-items: center;

@@ -1,5 +1,9 @@
 {
+  "login": {
+    "signIn": "Sign In"
+  },
   "routingFeature": {
+    "TODO": "remove all of these",
     "title": "Industry-standard Routing",
     "description": "It's natural to want to add pages (e.g. `/about`) to your application, and routing makes this possible."
   },

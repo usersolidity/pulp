@@ -4,7 +4,7 @@ import styled from 'styled-components/macro';
 export function Logo() {
   return (
     <Wrapper>
-      <Title>pulp</Title>
+      <Title href="/">pulp</Title>
       <Description>Publish on Web 3</Description>
     </Wrapper>
   );
@@ -15,11 +15,22 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 
-const Title = styled.div`
+const Title = styled.a`
   font-size: 1.25rem;
-  color: ${p => p.theme.text};
+  color: ${p => p.theme.primary};
   font-weight: bold;
   margin-right: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: none;
+    color: ${p => p.theme.primary};
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 0.4;
+  }
 `;
 
 const Description = styled.div`

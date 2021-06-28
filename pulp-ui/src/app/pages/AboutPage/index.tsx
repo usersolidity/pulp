@@ -1,18 +1,18 @@
+import { NavBar } from 'app/components/NavBar';
+import { PageWrapper } from 'app/components/PageWrapper';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { NavBar } from 'app/components/NavBar';
-import { Masthead } from './Masthead';
 import { Features } from './Features';
-import { PageWrapper } from 'app/components/PageWrapper';
+import { Masthead } from './Masthead';
 
 export function AboutPage() {
   return (
     <>
       <Helmet>
-        <title>About Page</title>
+        <title>About</title>
         <meta
           name="description"
-          content="A React Boilerplate application homepage"
+          content="Information about Pulp"
         />
       </Helmet>
       <NavBar />

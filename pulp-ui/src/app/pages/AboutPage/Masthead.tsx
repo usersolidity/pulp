@@ -1,17 +1,17 @@
+import { A } from 'app/components/A';
 import * as React from 'react';
 import styled from 'styled-components/macro';
-import { Logos } from './Logos';
-import { Title } from './components/Title';
 import { Lead } from './components/Lead';
-import { A } from 'app/components/A';
+import { Title } from './components/Title';
+import { Logos } from './Logos';
 
 export function Masthead() {
   return (
     <Wrapper>
       <Logos />
-      <Title>React Boilerplate meets CRA</Title>
+      <Title>What is Pulp?</Title>
       <Lead>
-        Now you can use the{' '}
+        The publishing protocol{' '}
         <A
           href="https://www.reactboilerplate.com/"
           target="_blank"
