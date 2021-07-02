@@ -26,7 +26,6 @@ export const componentVariations = (): ComponentVariationType => {
   const paths = [
     '/components',
     '/pages/HomePage/Features',
-    '/pages/HomePage/Features/GithubRepoForm',
   ];
   for (let i = 0; i < paths.length; i++) {
     const path = paths[i];

@@ -8,26 +8,26 @@ exports[`<Features /> should render with de translations 1`] = `
     Features
   </Title>
   <Lead>
-    Crafted for 
+    Crafted for
     <strong>
       highly scalable
     </strong>
     ,
-     
+
     <strong>
       easily maintainable
     </strong>
      and
-     
+
     <strong>
       highly performant
     </strong>
      React.js applications with a focus on
-     
+
     <strong>
       best DX
     </strong>
-     and 
+     and
     <strong>
       best practices
     </strong>
@@ -44,7 +44,7 @@ exports[`<Features /> should render with de translations 1`] = `
         </SubTitle>
         <P>
           Build easy to test and debug, flexible and extensible applications using
-           
+
           <A
             href="https://redux.js.org/basics/usage-with-react"
             rel="noopener noreferrer"
@@ -53,7 +53,7 @@ exports[`<Features /> should render with de translations 1`] = `
             Redux
           </A>
           . Unidirectional data flow allows for change logging and time travel debugging.
-           
+
           <A
             href="https://github.com/zalmoxisus/redux-devtools-extension"
             rel="noopener noreferrer"
@@ -61,10 +61,9 @@ exports[`<Features /> should render with de translations 1`] = `
           >
             Install Chrome Redux Dev Tools
           </A>
-           
+
           to see how your application's state changes and travel in time to debug. Type any github username below and see it in action with Redux Dev Tools.
         </P>
-        <GithubRepoForm />
       </Features__Content>
     </Features__Feature>
     <Features__Feature>
@@ -88,7 +87,7 @@ exports[`<Features /> should render with de translations 1`] = `
       <Features__Content>
         <SubTitle>
           i18n Internationalisierung und Pluralisierung
-           
+
         </SubTitle>
         <P>
           Das Internet ist global. Mehrsprachige- und Pluralisierungsunterstützung ist entscheidend für große Web-Anwendungen. Sie können die Sprache unten verändern, ohne die Seite aktualisieren zu müssen.
@@ -113,13 +112,13 @@ exports[`<Features /> should render with de translations 1`] = `
           <br />
           <small>
             Go to our
-             
+
             <Link
               to="/notfound"
             >
               /NotFound
             </Link>
-             
+
             page to see how routing works
           </small>
         </P>
@@ -202,26 +201,26 @@ exports[`<Features /> should render with en translations 1`] = `
     Features
   </Title>
   <Lead>
-    Crafted for 
+    Crafted for
     <strong>
       highly scalable
     </strong>
     ,
-     
+
     <strong>
       easily maintainable
     </strong>
      and
-     
+
     <strong>
       highly performant
     </strong>
      React.js applications with a focus on
-     
+
     <strong>
       best DX
     </strong>
-     and 
+     and
     <strong>
       best practices
     </strong>
@@ -238,7 +237,7 @@ exports[`<Features /> should render with en translations 1`] = `
         </SubTitle>
         <P>
           Build easy to test and debug, flexible and extensible applications using
-           
+
           <A
             href="https://redux.js.org/basics/usage-with-react"
             rel="noopener noreferrer"
@@ -247,7 +246,7 @@ exports[`<Features /> should render with en translations 1`] = `
             Redux
           </A>
           . Unidirectional data flow allows for change logging and time travel debugging.
-           
+
           <A
             href="https://github.com/zalmoxisus/redux-devtools-extension"
             rel="noopener noreferrer"
@@ -255,10 +254,9 @@ exports[`<Features /> should render with en translations 1`] = `
           >
             Install Chrome Redux Dev Tools
           </A>
-           
+
           to see how your application's state changes and travel in time to debug. Type any github username below and see it in action with Redux Dev Tools.
         </P>
-        <GithubRepoForm />
       </Features__Content>
     </Features__Feature>
     <Features__Feature>
@@ -282,7 +280,7 @@ exports[`<Features /> should render with en translations 1`] = `
       <Features__Content>
         <SubTitle>
           i18n Internationalization & Pluralization
-           
+
         </SubTitle>
         <P>
           Scalable apps need to support multiple languages, easily add and support multiple languages. Change the language below to see how instantly it updates the page without refreshing.
@@ -307,13 +305,13 @@ exports[`<Features /> should render with en translations 1`] = `
           <br />
           <small>
             Go to our
-             
+
             <Link
               to="/notfound"
             >
               /NotFound
             </Link>
-             
+
             page to see how routing works
           </small>
         </P>
