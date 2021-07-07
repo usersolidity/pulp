@@ -20,10 +20,7 @@ export function LoginPage() {
     <>
       <Helmet>
         <title>Sign In</title>
-        <meta
-          name="description"
-          content="Sign in to use Pulp"
-        />
+        <meta name="description" content="Sign in to use Pulp" />
       </Helmet>
       <NavBar />
       <PageWrapper>
@@ -36,16 +33,12 @@ export function LoginPage() {
                 <Card.Body>
                   <div className="mb-3">
                     <Button block size="lg" variant="light">
-                      <MetamaskLogo style={{ width: '1.25rem', height: '1.25rem' }} />
-                      {' '}
-                      Metamask
+                      <MetamaskLogo style={{ width: '1.25rem', height: '1.25rem' }} /> Metamask
                     </Button>
                   </div>
                   <div className="mb-3">
                     <Button block size="lg" variant="light" disabled>
-                      <CoinbaseWalletLogo style={{ width: '1.25rem', height: '1.25rem' }} />
-                      {' '}
-                      Coinbase Wallet
+                      <CoinbaseWalletLogo style={{ width: '1.25rem', height: '1.25rem' }} /> Coinbase Wallet
                     </Button>
                   </div>
                 </Card.Body>

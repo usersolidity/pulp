@@ -1,6 +1,6 @@
 import { createSelector, PayloadAction } from '@reduxjs/toolkit';
 import { pnlp_client } from 'app/pnlp-client';
-import { ArticleDto, ArticleEntity, ArticleMetadata, PublicationDto, PublicationEntity, PublicationMetadata, PublicationSettingsEntity, PulpError } from 'pnlp/domain';
+import { ArticleDto, ArticleEntity, ArticleMetadata, PnlpError, PublicationDto, PublicationEntity, PublicationMetadata, PublicationSettingsEntity } from 'pnlp/domain';
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { RootState } from 'types';
 import { createSlice } from 'utils/@reduxjs/toolkit';
@@ -10,24 +10,26 @@ export interface PublicationState {
   requested_slug: string;
 
   loading: boolean;
-  load_error?: PulpError;
+  load_error?: PnlpError;
 
   writing: boolean;
-  write_error?: PulpError;
+  write_error?: PnlpError;
 
   awaiting_tx: boolean;
-  tx_error?: PulpError;
+  tx_error?: PnlpError;
 
   entity: PublicationEntity;
   metadata?: PublicationMetadata;
 }
 
 export interface PublicationSettingsState {
+  requested_slug: string;
+
   loading: boolean;
-  load_error?: PulpError;
+  load_error?: PnlpError;
 
   writing: boolean;
-  write_error?: PulpError;
+  write_error?: PnlpError;
 
   entity: PublicationSettingsEntity;
 }
@@ -39,13 +41,13 @@ export interface ArticleState {
   preview: boolean; // preview == true should simply show default article view page. draft == true should add annotations to that page.
 
   awaiting_tx: boolean;
-  tx_error?: PulpError;
+  tx_error?: PnlpError;
 
   loading: boolean;
-  load_error?: PulpError;
+  load_error?: PnlpError;
 
   writing: boolean;
-  write_error?: PulpError;
+  write_error?: PnlpError;
 
   entity: ArticleEntity;
   metadata?: ArticleMetadata;
@@ -71,14 +73,14 @@ export const initialPublicationState: PublicationState = {
       tagline: '',
       img_url: '',
       header_url: '',
-      primary_color: '',
-      secondary_color: '',
+      theme: {},
       tags: {},
     },
   },
-}
+};
 
 export const initialSettingsState: PublicationSettingsState = {
+  requested_slug: '',
   loading: false,
   writing: false,
   entity: {},
@@ -125,11 +127,12 @@ const slice = createSlice({
       state.publication.tx_error = undefined;
       state.publication.entity = action.payload;
     },
-    createPublicationError(state, action: PayloadAction<PulpError>) {
+    createPublicationError(state, action: PayloadAction<PnlpError>) {
       state.publication.awaiting_tx = false;
       state.publication.tx_error = action.payload;
     },
-    loadPublication(state) {
+    loadPublication(state, action: PayloadAction<string>) {
+      state.publication.requested_slug = action.payload;
       state.publication.loading = true;
       state.publication.load_error = undefined;
     },
@@ -138,7 +141,7 @@ const slice = createSlice({
       state.publication.load_error = undefined;
       state.publication.entity = action.payload;
     },
-    loadPublicationError(state, action: PayloadAction<PulpError>) {
+    loadPublicationError(state, action: PayloadAction<PnlpError>) {
       state.publication.loading = false;
       state.publication.load_error = action.payload;
     },
@@ -151,14 +154,15 @@ const slice = createSlice({
       state.publication.load_error = undefined;
       state.publication.entity = action.payload;
     },
-    updatePublicationError(state, action: PayloadAction<PulpError>) {
+    updatePublicationError(state, action: PayloadAction<PnlpError>) {
       state.publication.writing = false;
       state.publication.write_error = action.payload;
     },
     setArticle(state, action: PayloadAction<ArticleEntity>) {
       state.article.entity = action.payload;
     },
-    loadArticle(state) {
+    loadArticle(state, action: PayloadAction<string>) {
+      state.article.requested_slug = action.payload;
       state.article.loading = true;
       state.article.load_error = undefined;
     },
@@ -167,7 +171,7 @@ const slice = createSlice({
       state.article.load_error = undefined;
       state.article.entity = action.payload;
     },
-    loadArticleError(state, action: PayloadAction<PulpError>) {
+    loadArticleError(state, action: PayloadAction<PnlpError>) {
       state.article.loading = false;
       state.article.load_error = action.payload;
     },
@@ -185,7 +189,7 @@ const slice = createSlice({
       state.article.entity = action.payload.article;
       state.article.metadata = action.payload.metadata;
     },
-    publishArticleError(state, action: PayloadAction<PulpError>) {
+    publishArticleError(state, action: PayloadAction<PnlpError>) {
       state.article.draft = true;
       state.article.preview = false;
       state.article.awaiting_tx = false;
@@ -194,7 +198,8 @@ const slice = createSlice({
     setSettings(state, action: PayloadAction<PublicationSettingsEntity>) {
       state.settings.entity = action.payload;
     },
-    loadSettings(state) {
+    loadSettings(state, action: PayloadAction<string>) {
+      state.settings.requested_slug = action.payload;
       state.settings.loading = true;
       state.settings.load_error = undefined;
     },
@@ -203,7 +208,7 @@ const slice = createSlice({
       state.settings.load_error = undefined;
       state.settings.entity = action.payload;
     },
-    loadSettingsError(state, action: PayloadAction<PulpError>) {
+    loadSettingsError(state, action: PayloadAction<PnlpError>) {
       state.settings.loading = false;
       state.settings.load_error = action.payload;
     },
@@ -215,7 +220,7 @@ const slice = createSlice({
       state.settings.loading = false;
       state.settings.load_error = undefined;
     },
-    updateSettingsError(state, action: PayloadAction<PulpError>) {
+    updateSettingsError(state, action: PayloadAction<PnlpError>) {
       state.settings.writing = false;
       state.settings.write_error = action.payload;
     },
@@ -225,21 +230,11 @@ const slice = createSlice({
 // First select the relevant part from the state
 const selectDomain = (state: RootState) => state.adminState || initialState;
 
-export const selectPublication = createSelector(
-  [selectDomain],
-  adminState => adminState.publication,
-);
+export const selectPublication = createSelector([selectDomain], adminState => adminState.publication);
 
-export const selectArticle = createSelector(
-  [selectDomain],
-  adminState => adminState.article,
-);
+export const selectArticle = createSelector([selectDomain], adminState => adminState.article);
 
-export const selectSettings = createSelector(
-  [selectDomain],
-  adminState => adminState.settings,
-);
-
+export const selectSettings = createSelector([selectDomain], adminState => adminState.settings);
 
 export const { actions: adminActions, reducer } = slice;
 
@@ -316,10 +311,10 @@ export function* updateSettings() {
 }
 
 export function* loadSettings() {
-  const publication: PublicationState = yield select(selectPublication);
+  const settings: PublicationSettingsState = yield select(selectSettings);
 
   try {
-    const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(publication.entity.slug);
+    const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug);
     yield put(adminActions.loadSettingsSuccess(response));
   } catch (err) {
     yield put(adminActions.loadSettingsError(err));

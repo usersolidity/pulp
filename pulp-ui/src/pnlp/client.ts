@@ -1,4 +1,15 @@
-import { ArticleDto, ArticleEntity, EthereumTransactionId, IpfsHash, IpnsHash, PnlpConstant, PublicationDto, PublicationEntity, PublicationMetadata, PublicationSettingsEntity } from 'pnlp/domain';
+import {
+  ArticleDto,
+  ArticleEntity,
+  EthereumTransactionId,
+  IpfsHash,
+  IpnsHash,
+  PnlpConstant,
+  PublicationDto,
+  PublicationEntity,
+  PublicationMetadata,
+  PublicationSettingsEntity
+} from 'pnlp/domain';
 
 export interface BlockchainService {
   createPublication(publication_slug: string, ipns_address: IpnsHash): Promise<EthereumTransactionId>;
@@ -61,7 +72,6 @@ export class PnlpClient {
   }
 
   public async updatePublication(publication: PublicationEntity): Promise<PublicationEntity> {
-
     console.debug(`creating a new publication: ${JSON.stringify(publication)}`);
 
     const buffer = Buffer.from(JSON.stringify(publication, null, 2));
@@ -117,14 +127,12 @@ export class PnlpClient {
     if (!files) {
       throw new Error(`The root publication path does not exist or is not visible`);
     }
-    return files.filter((f) => PnlpConstant.RESERVED_NAMES.every((r) => f !== r));
+    return files.filter(f => PnlpConstant.RESERVED_NAMES.every(r => f !== r));
   }
 
-  public async publishArticle(
-    article: ArticleEntity
-  ): Promise<ArticleDto> {
+  public async publishArticle(article: ArticleEntity): Promise<ArticleDto> {
     console.debug(
-      `publishing article ${article.slug}; ${article.content.title}; subtitle length ${article.content.subtitle?.length}; content length ${article.content.body.length}`
+      `publishing article ${article.slug}; ${article.content.title}; subtitle length ${article.content.subtitle?.length}; content length ${article.content.body.length}`,
     );
 
     const article_buffer = Buffer.from(JSON.stringify(article, null, 2));
@@ -158,27 +166,20 @@ export class PnlpClient {
         ipfs: ipfs_address,
         ipns: ipns_address,
         tx: transaction_hash,
-      }
-    }
+      },
+    };
   }
 
-  public async loadArticle(
-    publication_slug: string,
-    article_slug: string
-  ): Promise<{ publication: PublicationEntity; article: ArticleDto }> {
+  public async loadArticle(publication_slug: string, article_slug: string): Promise<{ publication: PublicationEntity; article: ArticleDto }> {
     console.debug(`fetching article: ${publication_slug}/${article_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
     const ipns_hash = publication_record.ipns;
     const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
 
-    const article = await this.ipfs_service.catIpfsJson<ArticleEntity>(
-      `/ipfs/${ipfs_hash}/${publication_slug}/${article_slug}`
-    );
+    const article = await this.ipfs_service.catIpfsJson<ArticleEntity>(`/ipfs/${ipfs_hash}/${publication_slug}/${article_slug}`);
 
-    const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(
-      `/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`
-    );
+    const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(`/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`);
 
     if (!article) {
       throw new Error(`Article pulp/${publication_slug}/${article_slug} does not exist or is not visible`);
@@ -192,7 +193,7 @@ export class PnlpClient {
           ipfs: ipfs_hash,
           ipns: ipns_hash,
           tx: 'not-implemented: TODO: do we need to get TransactionId in this direction?',
-        }
+        },
       },
     };
   }

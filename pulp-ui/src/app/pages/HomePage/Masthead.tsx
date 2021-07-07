@@ -12,20 +12,12 @@ export function Masthead() {
       {/* <Logos /> */}
       <Title>Publish on Web 3</Title>
       <Lead>
-        Pulp is a distributed publishing platform built on {' '}
-        <A
-          href="https://ethereum.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        Pulp is a distributed publishing platform built on{' '}
+        <A href="https://ethereum.org/" target="_blank" rel="noopener noreferrer">
           Ethereum
-        </A>
-        {' '}and{' '}
-        <A
-          href="https://ipfs.io/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        </A>{' '}
+        and{' '}
+        <A href="https://ipfs.io/" target="_blank" rel="noopener noreferrer">
           IPFS
         </A>
         .
@@ -33,12 +25,12 @@ export function Masthead() {
       <div>
         <LinkContainer to="/new" className="mr-3">
           <Button size="lg" variant="primary">
-              Get Started
+            Get Started
           </Button>
         </LinkContainer>
         <LinkContainer to="/login">
           <Button size="lg" variant="light">
-              Sign In
+            Sign In
           </Button>
         </LinkContainer>
       </div>

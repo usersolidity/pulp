@@ -1,9 +1,9 @@
 import * as React from 'react';
 import styled from 'styled-components/macro';
-import { Logo } from './Logo';
 import { StyleConstants } from 'styles/StyleConstants';
-import { Nav } from './Nav';
 import { PageWrapper } from '../PageWrapper';
+import { Logo } from './Logo';
+import { Nav } from './Nav';
 
 export function NavBar() {
   return (
@@ -28,11 +28,7 @@ const Wrapper = styled.header`
 
   @supports (backdrop-filter: blur(10px)) {
     backdrop-filter: blur(10px);
-    background-color: ${p =>
-      p.theme.background.replace(
-        /rgba?(\(\s*\d+\s*,\s*\d+\s*,\s*\d+)(?:\s*,.+?)?\)/,
-        'rgba$1,0.75)',
-      )};
+    background-color: ${p => p.theme.background.replace(/rgba?(\(\s*\d+\s*,\s*\d+\s*,\s*\d+)(?:\s*,.+?)?\)/, 'rgba$1,0.75)')};
   }
 
   ${PageWrapper} {

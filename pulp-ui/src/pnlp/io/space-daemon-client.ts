@@ -2,7 +2,6 @@ import { IpfsService } from 'pnlp/client';
 import { IpfsHash, IpnsHash } from 'pnlp/domain';
 
 class SpaceDaemonClient implements IpfsService {
-
   async writeData(path: string, buffer: Buffer): Promise<IpnsHash> {
     // TODO:
     console.log('writing ipfs data to space daemon... NOT YET IMPLEMENTED');

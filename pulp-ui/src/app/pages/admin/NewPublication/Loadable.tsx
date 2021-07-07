@@ -1,5 +1,5 @@
 /**
- * Asynchronously loads the component for NewPublication
+ * Asynchronously loads the component for NewPublicationRoot
  */
 
 import { LoadingIndicator } from 'app/components/LoadingIndicator';
@@ -15,9 +15,9 @@ const LoadingWrapper = styled.div`
   justify-content: center;
 `;
 
-export const NewPublication = lazyLoad(
-  () => import('./NewPublication'),
-  module => module.NewPublication,
+export const NewPublicationRoot = lazyLoad(
+  () => import('./NewPublicationRoot'),
+  module => module.NewPublicationRoot,
   {
     fallback: (
       <LoadingWrapper>

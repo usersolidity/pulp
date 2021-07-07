@@ -1,39 +1,37 @@
 import { Link } from 'app/components/Link';
 import { PageWrapper } from 'app/components/PageWrapper';
+import { selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
-import { useRouteMatch } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
 
 export function AdminNavBar() {
   let { url } = useRouteMatch();
+  let { p_slug } = useParams<{ p_slug?: string }>();
+  const { actions } = useAdminSlice();
+  const publication = useSelector(selectPublication);
+  const dispatch = useDispatch();
 
   return (
     <Wrapper>
       <PageWrapper>
         <TitleWrapper>
-          <Title href="/">The New York Rhymes</Title>
+          <Title href="/">{publication?.entity?.properties?.title}</Title>
         </TitleWrapper>
         <NavWrapper>
           <Item>
-            <Link to={`${url}/write`}>
-              Write
-            </Link>
+            <Link to={`${url}/write`}>Write</Link>
           </Item>
           <Item>
-            <Link to={`${url}/history`}>
-              History
-            </Link>
+            <Link to={`${url}/history`}>History</Link>
           </Item>
           <Item>
-            <Link to={`${url}/subscribers`}>
-              Subscribers
-            </Link>
+            <Link to={`${url}/subscribers`}>Subscribers</Link>
           </Item>
           <Item>
-            <Link to={`${url}/settings`}>
-              Settings
-            </Link>
+            <Link to={`${url}/settings`}>Settings</Link>
           </Item>
         </NavWrapper>
       </PageWrapper>
@@ -53,11 +51,7 @@ const Wrapper = styled.header`
 
   @supports (backdrop-filter: blur(10px)) {
     backdrop-filter: blur(10px);
-    background-color: ${p =>
-      p.theme.background.replace(
-        /rgba?(\(\s*\d+\s*,\s*\d+\s*,\s*\d+)(?:\s*,.+?)?\)/,
-        'rgba$1,0.75)',
-      )};
+    background-color: ${p => p.theme.background.replace(/rgba?(\(\s*\d+\s*,\s*\d+\s*,\s*\d+)(?:\s*,.+?)?\)/, 'rgba$1,0.75)')};
   }
 
   ${PageWrapper} {

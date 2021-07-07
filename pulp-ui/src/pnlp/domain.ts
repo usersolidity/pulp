@@ -1,27 +1,18 @@
 export type ErrorDomain = 'ipfs' | 'eth' | 'pnlp';
 export type ErrorOperation = 'r' | 'w';
 
-export class PulpError {
+export interface PnlpError {
   domain: ErrorDomain;
   operation: ErrorOperation;
   message: string;
   trace: string;
   date: Date;
-
-  constructor(data: { domain: ErrorDomain, operation: ErrorOperation, trace: string, message: string }) {
-    Object.assign(this, data);
-    this.domain = data.domain;
-    this.operation = data.operation;
-    this.message = data.message;
-    this.trace = data.trace;
-    this.date = new Date();
-  }
 }
 
 export class PnlpConstant {
   public static INDEX_FILENAME = '.pnlp.json';
   public static SETTINGS_FILENAME = '.pnlp.private.json';
-  public static RESERVED_NAMES = ['.textileseed'];
+  public static RESERVED_NAMES = [PnlpConstant.INDEX_FILENAME, PnlpConstant.SETTINGS_FILENAME, '.textileseed', '.pnlp'];
   public static ROOT = '/';
 }
 
@@ -38,7 +29,6 @@ export type EmailAddress = string;
 export type SmsAddress = string;
 export type TwitterAddress = string;
 export type BitcloutAddress = string;
-
 
 /**
  * Corresponds to an IPFS file,
@@ -68,8 +58,15 @@ export interface PublicationPropertiesEntity {
   tagline: string;
   img_url: IpfsHash;
   header_url: IpfsHash;
-  primary_color: string;
-  secondary_color: string;
+  theme: {
+    primary?: string;
+    text?: string;
+    textSecondary?: string;
+    background?: string;
+    backgroundVariant?: string;
+    border?: string;
+    borderLight?: string;
+  };
   tags: { [key: string]: string };
 }
 
@@ -118,7 +115,6 @@ export interface ArticleEntity {
   content?: any; // TODO: bytes?
 }
 
-
 /**
  * Begin data transfer objects
  */
@@ -136,8 +132,8 @@ export interface ArticleMetadata {
 }
 
 export interface ArticleDto {
-  metadata: ArticleMetadata
-  article: ArticleEntity
+  metadata: ArticleMetadata;
+  article: ArticleEntity;
 }
 
 export interface PublicationDto {
