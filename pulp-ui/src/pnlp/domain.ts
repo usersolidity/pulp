@@ -1,12 +1,5 @@
-export type ErrorDomain = 'ipfs' | 'eth' | 'pnlp';
-export type ErrorOperation = 'r' | 'w';
-
 export interface PnlpError {
-  domain: ErrorDomain;
-  operation: ErrorOperation;
   message: string;
-  trace: string;
-  date: Date;
 }
 
 export class PnlpConstant {
@@ -23,6 +16,7 @@ export class PnlpConstant {
 export type IpfsHash = string;
 export type IpnsHash = string;
 export type EthereumAddress = string;
+export type EnsAlias = string;
 export type EthereumTransactionId = string;
 export type EthereumContractAddress = string;
 export type EmailAddress = string;

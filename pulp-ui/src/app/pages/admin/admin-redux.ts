@@ -1,6 +1,7 @@
 import { createSelector, PayloadAction } from '@reduxjs/toolkit';
 import { pnlp_client } from 'app/pnlp-client';
-import { ArticleDto, ArticleEntity, ArticleMetadata, PnlpError, PublicationDto, PublicationEntity, PublicationMetadata, PublicationSettingsEntity } from 'pnlp/domain';
+import { ArticleDto, ArticleEntity, ArticleMetadata, EnsAlias, PnlpError, PublicationDto, PublicationEntity, PublicationMetadata, PublicationSettingsEntity } from 'pnlp/domain';
+import { PnlpIdentity } from 'pnlp/identity';
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { RootState } from 'types';
 import { createSlice } from 'utils/@reduxjs/toolkit';
@@ -53,10 +54,20 @@ export interface ArticleState {
   metadata?: ArticleMetadata;
 }
 
+export interface IdentityState {
+  loading?: boolean;
+  load_error?: PnlpError;
+
+  state?: PnlpIdentity;
+
+  ens_alias?: string;
+}
+
 export interface AdminState {
   publication: PublicationState;
   settings: PublicationSettingsState;
   article: ArticleState;
+  identity: IdentityState;
 }
 
 export const initialPublicationState: PublicationState = {
@@ -102,10 +113,15 @@ export const initialArticleState: ArticleState = {
   },
 };
 
+export const initialIdentityState: IdentityState = {
+  loading: false,
+};
+
 export const initialState: AdminState = {
   publication: initialPublicationState,
   settings: initialSettingsState,
   article: initialArticleState,
+  identity: initialIdentityState,
 };
 
 const slice = createSlice({
@@ -204,7 +220,7 @@ const slice = createSlice({
       state.settings.load_error = undefined;
     },
     loadSettingsSuccess(state, action: PayloadAction<PublicationSettingsEntity>) {
-      state.settings.loading = true;
+      state.settings.loading = false;
       state.settings.load_error = undefined;
       state.settings.entity = action.payload;
     },
@@ -224,6 +240,27 @@ const slice = createSlice({
       state.settings.writing = false;
       state.settings.write_error = action.payload;
     },
+    loadIdentity(state) {
+      state.identity.loading = true;
+      state.identity.load_error = undefined;
+    },
+    loadIdentitySuccess(state, action: PayloadAction<PnlpIdentity>) {
+      state.identity.loading = false;
+      state.identity.load_error = undefined;
+      state.identity.state = action.payload;
+    },
+    loadEnsSuccess(state, action: PayloadAction<EnsAlias | undefined>) {
+      state.identity.ens_alias = action.payload;
+    },
+    loadIdentityError(state, action: PayloadAction<PnlpError>) {
+      state.identity.loading = false;
+      state.identity.load_error = action.payload;
+    },
+    clearIdentity(state) {
+      state.identity.loading = false;
+      state.identity.load_error = undefined;
+      state.identity.state = undefined;
+    },
   },
 });
 
@@ -236,15 +273,26 @@ export const selectArticle = createSelector([selectDomain], adminState => adminS
 
 export const selectSettings = createSelector([selectDomain], adminState => adminState.settings);
 
+export const selectIdentity = createSelector([selectDomain], adminState => adminState.identity);
+
 export const { actions: adminActions, reducer } = slice;
+
+export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
+  if (!identity?.ethereum_address || !identity?.ipns_key) {
+    throw new Error('Unauthorized');
+  }
+}
 
 /**
  * Begin Sagas
  */
 export function* createPublication() {
   const publication: PublicationState = yield select(selectPublication);
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
+
   try {
-    const response: PublicationDto = yield pnlp_client.createPublication(publication.entity);
+    const response: PublicationDto = yield pnlp_client.createPublication(publication.entity, identity!.state!.ipns_key);
     yield put(adminActions.setPublicationMetadata(response.metadata));
     yield pnlp_client.awaitTransaction(response.metadata.tx);
     yield put(adminActions.createPublicationSuccess(response.publication));
@@ -255,9 +303,11 @@ export function* createPublication() {
 
 export function* updatePublication() {
   const publication: PublicationState = yield select(selectPublication);
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
 
   try {
-    const response: PublicationEntity = yield pnlp_client.updatePublication(publication.entity);
+    const response: PublicationEntity = yield pnlp_client.updatePublication(publication.entity, identity!.state!.ipns_key);
     yield put(adminActions.updatePublicationSuccess(response));
   } catch (err) {
     yield put(adminActions.updatePublicationError(err));
@@ -266,9 +316,11 @@ export function* updatePublication() {
 
 export function* loadPublication() {
   const publication: PublicationState = yield select(selectPublication);
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
 
   try {
-    const response: PublicationEntity = yield pnlp_client.loadPublication(publication.requested_slug);
+    const response: PublicationEntity = yield pnlp_client.loadPublication(publication.requested_slug, identity!.state!.ipns_key);
     yield put(adminActions.loadPublicationSuccess(response));
   } catch (err) {
     yield put(adminActions.loadPublicationError(err));
@@ -277,9 +329,10 @@ export function* loadPublication() {
 
 export function* publishArticle() {
   const article: ArticleState = yield select(selectArticle);
+  const identity: IdentityState = yield select(selectIdentity);
 
   try {
-    const response: ArticleDto = yield pnlp_client.publishArticle(article.entity);
+    const response: ArticleDto = yield pnlp_client.publishArticle(article.entity, identity!.state!.ipns_key);
     yield put(adminActions.publishArticleSuccess(response));
   } catch (err) {
     yield put(adminActions.publishArticleError(err));
@@ -289,9 +342,11 @@ export function* publishArticle() {
 export function* loadArticle() {
   const article: ArticleState = yield select(selectArticle);
   const publication: PublicationState = yield select(selectPublication);
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
 
   try {
-    const response: ArticleDto = yield pnlp_client.loadArticle(publication.entity.slug, article.requested_slug);
+    const response: ArticleDto = yield pnlp_client.loadArticle(publication.entity.slug, article.requested_slug, identity!.state!.ipns_key);
     yield put(adminActions.publishArticleSuccess(response));
   } catch (err) {
     yield put(adminActions.publishArticleError(err));
@@ -301,9 +356,11 @@ export function* loadArticle() {
 export function* updateSettings() {
   const settings: PublicationSettingsState = yield select(selectSettings);
   const publication: PublicationState = yield select(selectPublication);
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
 
   try {
-    const response: PublicationSettingsEntity = yield pnlp_client.updatePublicationSettings(publication.entity.slug, settings.entity);
+    const response: PublicationSettingsEntity = yield pnlp_client.updatePublicationSettings(publication.entity.slug, settings.entity, identity!.state!.ipns_key);
     yield put(adminActions.updateSettingsSuccess(response));
   } catch (err) {
     yield put(adminActions.updateSettingsError(err));
@@ -312,12 +369,29 @@ export function* updateSettings() {
 
 export function* loadSettings() {
   const settings: PublicationSettingsState = yield select(selectSettings);
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
 
   try {
-    const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug);
+    const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug, identity!.state!.ipns_key);
     yield put(adminActions.loadSettingsSuccess(response));
   } catch (err) {
     yield put(adminActions.loadSettingsError(err));
+  }
+}
+
+export function* loadIdentity() {
+  try {
+    const response: PnlpIdentity = yield pnlp_client.establishIdentity();
+    yield put(adminActions.loadIdentitySuccess(response));
+    const alias: EnsAlias | undefined = yield pnlp_client.lookupEns(response.ethereum_address);
+    yield put(adminActions.loadEnsSuccess(alias));
+  } catch (err) {
+    console.log(err);
+    const pnlp_error = {
+      message: err.message,
+    };
+    yield put(adminActions.loadIdentityError(pnlp_error));
   }
 }
 
@@ -337,6 +411,7 @@ export function* adminSaga() {
   yield takeLatest(adminActions.loadArticle.type, loadArticle);
   yield takeLatest(adminActions.updateSettings.type, updateSettings);
   yield takeLatest(adminActions.loadSettings.type, loadSettings);
+  yield takeLatest(adminActions.loadIdentity.type, loadIdentity);
 }
 
 export const useAdminSlice = () => {

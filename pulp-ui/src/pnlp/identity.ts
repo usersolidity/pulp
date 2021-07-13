@@ -69,6 +69,45 @@ export interface PrivateKey {
    */
   id(): Promise<string>;
 }
+
+export declare class Ed25519PrivateKey implements PrivateKey {
+  private privateKey;
+  private publicKey;
+  /**
+   * Construct a Ed25519 private key.
+   * @param key 64 byte Uint8Array or Buffer containing private key
+   * @param publicKey 32 byte Uint8Array or Buffer containing public key
+   */
+  constructor(privateKey: Uint8Array, publicKey: Uint8Array);
+  sign(message: Uint8Array): Promise<Buffer>;
+  get public(): Ed25519PublicKey;
+  marshal(): Uint8Array;
+  get publicKeyBuffer(): Buffer;
+  get privateKeyBuffer(): Buffer;
+  get bytes(): Uint8Array;
+  equals(key: PrivateKey): boolean;
+  hash(): Promise<Uint8Array>;
+  /**
+   * Gets the ID of the key.
+   *
+   * The key id is the base58 encoding of the SHA-256 multihash of its public key.
+   * The public key is a protobuf encoding containing a type and the DER encoding
+   * of the PKCS SubjectPublicKeyInfo.
+   */
+  id(): Promise<string>;
+}
+
+export declare class Ed25519PublicKey implements PublicKey {
+  private publicKey;
+  constructor(publicKey: Uint8Array);
+  verify(data: Uint8Array, sig: Uint8Array): Promise<boolean>;
+  marshal(): Uint8Array;
+  get buffer(): Buffer;
+  get bytes(): Uint8Array;
+  equals(key: PublicKey): boolean;
+  hash(): Promise<Uint8Array>;
+}
+
 export declare function publicKeyToString(key: PublicKey): string;
 export declare function privateKeyToString(key: PrivateKey): string;
 export declare function privateKeyFromString(str: string): Promise<PrivateKey>;
@@ -133,7 +172,6 @@ export declare class Libp2pCryptoIdentity implements Identity {
 }
 
 export interface PnlpIdentity {
-  ipns_identity: Libp2pCryptoIdentity;
-  ethereum_identity: EthereumAddress;
-  ens_alias: string;
+  ipns_key: Libp2pCryptoIdentity;
+  ethereum_address: EthereumAddress;
 }
