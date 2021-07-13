@@ -1,19 +1,18 @@
+import { selectIdentity } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
+import { useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import styled from 'styled-components/macro';
 
-export function Nav() {
+export function AccountDropdown() {
+  const identity = useSelector(selectIdentity);
+
   return (
     <Wrapper>
       <Item>
         <LinkContainer to="/new">
-          <Button variant="primary">Get Started</Button>
-        </LinkContainer>
-      </Item>
-      <Item>
-        <LinkContainer to="/login">
-          <Button variant="light">Sign In</Button>
+          <Button variant="primary">{identity?.state?.ethereum_address.slice(0, 4) + '...' + identity?.state?.ethereum_address.slice(-4)}</Button>
         </LinkContainer>
       </Item>
     </Wrapper>

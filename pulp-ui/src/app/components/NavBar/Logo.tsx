@@ -1,10 +1,13 @@
 import * as React from 'react';
+import { LinkContainer } from 'react-router-bootstrap';
 import styled from 'styled-components/macro';
 
 export function Logo() {
   return (
     <Wrapper>
-      <Title href="/">pulp</Title>
+      <LinkContainer to="/">
+        <Title>pulp</Title>
+      </LinkContainer>
       <Description>Publish on Web 3</Description>
     </Wrapper>
   );

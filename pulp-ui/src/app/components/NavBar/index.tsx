@@ -1,16 +1,21 @@
+import { selectIdentity } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
+import { AccountDropdown } from '../AccountDropdown';
 import { PageWrapper } from '../PageWrapper';
 import { Logo } from './Logo';
 import { Nav } from './Nav';
 
 export function NavBar() {
+  const identity = useSelector(selectIdentity);
+
   return (
     <Wrapper>
       <PageWrapper>
         <Logo />
-        <Nav />
+        {identity?.state ? <AccountDropdown /> : <Nav />}
       </PageWrapper>
     </Wrapper>
   );

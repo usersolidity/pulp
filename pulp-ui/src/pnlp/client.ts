@@ -1,4 +1,4 @@
-import { PrivateKey } from 'libp2p-crypto';
+import { PrivateKey } from '@textile/hub';
 import {
   ArticleDto,
   ArticleEntity,

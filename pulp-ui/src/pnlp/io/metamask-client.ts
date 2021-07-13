@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/keccak256';
 import { ExternalProvider, JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
-import { keys as libp2p_crypto_keys, PrivateKey } from 'libp2p-crypto';
+import { PrivateKey } from '@textile/hub';
 import { BlockchainService } from 'pnlp/client';
 import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata } from 'pnlp/domain';
 import ContractJson from './pnlp.json';
@@ -99,7 +99,7 @@ export class MetamaskClient implements BlockchainService {
   // From https://github.com/textileio/js-threads/blob/master/packages/crypto/src/ed25519.ts
   private readonly constants = {
     PUBLIC_KEY_BYTE_LENGTH: 32,
-    PRIVATE_KEY_BYTE_LENGTH: 64,
+    PRIVATE_KEY_BYTE_LENGTH: 32,
     SEED_BYTE_LENGTH: 32,
     SIGN_BYTE_LENGTH: 64,
     HASH_BYTE_LENGTH: 64,
@@ -124,24 +124,12 @@ export class MetamaskClient implements BlockchainService {
       .replace('0x', '') // Gets rid of the '0x' prefix
       .match(/.{2}/g); // Segments the string each two hex charachers. Each element of the array is one binary digit.
 
-    const half_array = segment?.map(hexNoPrefix => BigNumber.from('0x' + hexNoPrefix).toNumber()) || []; // Convert hex string to number
-    const array = [...half_array, ...half_array];
-    if (array?.length !== 64) {
+    const array = segment?.map(hexNoPrefix => BigNumber.from('0x' + hexNoPrefix).toNumber()) || []; // Convert hex string to number
+    if (array?.length !== 32) {
       throw new Error('Hash of signature is not the correct size! Something went wrong!');
     }
 
-    // I looked through the library. This is the function that Textile uses Ed25519 deep down.
-    // I also pass 1024 bits to this function, but it appears as if it is never used!
-    // I think the number of bits is used for other crypto functions.
-    const key: libp2p_crypto_keys.supportedKeys.ed25519.Ed25519PrivateKey = await libp2p_crypto_keys.generateKeyPairFromSeed('Ed25519', Uint8Array.from(array), 1024);
-    console.log(key);
-    // The above line was:
-    // await libp2p_crypto_keys.supportedKeys.ed25519.generateKeyPair()
-    const bytes = key.marshal();
-    console.log(bytes.length);
-    const privateKey = bytes.slice(0, this.constants.PRIVATE_KEY_BYTE_LENGTH);
-    const publicKey = bytes.slice(this.constants.PRIVATE_KEY_BYTE_LENGTH, this.constants.PRIVATE_KEY_BYTE_LENGTH + this.constants.PUBLIC_KEY_BYTE_LENGTH);
-    return new libp2p_crypto_keys.supportedKeys.ed25519.Ed25519PrivateKey(privateKey, publicKey);
+    return PrivateKey.fromRawEd25519Seed(Uint8Array.from(array));
   }
 
   private generateMessageForEntropy(ethereum_address: EthereumAddress, application_name: string): string {

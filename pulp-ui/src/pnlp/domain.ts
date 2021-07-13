@@ -1,5 +1,6 @@
 export interface PnlpError {
   message: string;
+  trace?: string;
 }
 
 export class PnlpConstant {

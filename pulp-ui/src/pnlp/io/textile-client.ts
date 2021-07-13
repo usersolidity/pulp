@@ -1,6 +1,5 @@
-import { Buckets, KeyInfo, Links } from '@textile/hub';
+import { Buckets, KeyInfo, Links, PrivateKey } from '@textile/hub';
 import axios from 'axios';
-import { PrivateKey } from 'libp2p-crypto';
 import { IpfsService } from 'pnlp/client';
 import { IpfsHash, IpnsHash } from 'pnlp/domain';
 
@@ -108,10 +107,15 @@ class TextileClient implements IpfsService {
 
     const buckets = await Buckets.withKeyInfo(this.auth);
 
+    console.debug('initialized with key...');
+
     // Authorize the user and your insecure keys with getToken
     await buckets.getToken(identity);
 
+    console.debug('got token...');
+
     const res = await buckets.getOrCreate('com.textile.io');
+    console.debug('created...');
     if (!res?.root) {
       throw new Error('Failed to open bucket');
     }

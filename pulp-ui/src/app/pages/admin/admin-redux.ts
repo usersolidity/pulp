@@ -297,7 +297,7 @@ export function* createPublication() {
     yield pnlp_client.awaitTransaction(response.metadata.tx);
     yield put(adminActions.createPublicationSuccess(response.publication));
   } catch (err) {
-    yield put(adminActions.createPublicationError(err));
+    yield put(adminActions.createPublicationError({ message: err.message, trace: err.trace }));
   }
 }
 
@@ -310,7 +310,7 @@ export function* updatePublication() {
     const response: PublicationEntity = yield pnlp_client.updatePublication(publication.entity, identity!.state!.ipns_key);
     yield put(adminActions.updatePublicationSuccess(response));
   } catch (err) {
-    yield put(adminActions.updatePublicationError(err));
+    yield put(adminActions.updatePublicationError({ message: err.message }));
   }
 }
 
@@ -323,7 +323,7 @@ export function* loadPublication() {
     const response: PublicationEntity = yield pnlp_client.loadPublication(publication.requested_slug, identity!.state!.ipns_key);
     yield put(adminActions.loadPublicationSuccess(response));
   } catch (err) {
-    yield put(adminActions.loadPublicationError(err));
+    yield put(adminActions.loadPublicationError({ message: err.message }));
   }
 }
 
@@ -335,7 +335,7 @@ export function* publishArticle() {
     const response: ArticleDto = yield pnlp_client.publishArticle(article.entity, identity!.state!.ipns_key);
     yield put(adminActions.publishArticleSuccess(response));
   } catch (err) {
-    yield put(adminActions.publishArticleError(err));
+    yield put(adminActions.publishArticleError({ message: err.message }));
   }
 }
 
@@ -349,7 +349,7 @@ export function* loadArticle() {
     const response: ArticleDto = yield pnlp_client.loadArticle(publication.entity.slug, article.requested_slug, identity!.state!.ipns_key);
     yield put(adminActions.publishArticleSuccess(response));
   } catch (err) {
-    yield put(adminActions.publishArticleError(err));
+    yield put(adminActions.publishArticleError({ message: err.message }));
   }
 }
 
@@ -363,7 +363,7 @@ export function* updateSettings() {
     const response: PublicationSettingsEntity = yield pnlp_client.updatePublicationSettings(publication.entity.slug, settings.entity, identity!.state!.ipns_key);
     yield put(adminActions.updateSettingsSuccess(response));
   } catch (err) {
-    yield put(adminActions.updateSettingsError(err));
+    yield put(adminActions.updateSettingsError({ message: err.message }));
   }
 }
 
@@ -376,7 +376,7 @@ export function* loadSettings() {
     const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug, identity!.state!.ipns_key);
     yield put(adminActions.loadSettingsSuccess(response));
   } catch (err) {
-    yield put(adminActions.loadSettingsError(err));
+    yield put(adminActions.loadSettingsError({ message: err.message }));
   }
 }
 
@@ -387,11 +387,7 @@ export function* loadIdentity() {
     const alias: EnsAlias | undefined = yield pnlp_client.lookupEns(response.ethereum_address);
     yield put(adminActions.loadEnsSuccess(alias));
   } catch (err) {
-    console.log(err);
-    const pnlp_error = {
-      message: err.message,
-    };
-    yield put(adminActions.loadIdentityError(pnlp_error));
+    yield put(adminActions.loadIdentityError({ message: err.message }));
   }
 }
 
