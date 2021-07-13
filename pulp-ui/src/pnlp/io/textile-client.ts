@@ -1,8 +1,8 @@
 import { Buckets, KeyInfo, Links } from '@textile/hub';
 import axios from 'axios';
+import { PrivateKey } from 'libp2p-crypto';
 import { IpfsService } from 'pnlp/client';
 import { IpfsHash, IpnsHash } from 'pnlp/domain';
-import { Libp2pCryptoIdentity } from 'pnlp/identity';
 
 class TextileClient implements IpfsService {
   private bucketMap: Map<string, Buckets> = new Map();
@@ -22,7 +22,7 @@ class TextileClient implements IpfsService {
     return ipns_string;
   }
 
-  public async writeData(path: string, content: Buffer, identity: Libp2pCryptoIdentity): Promise<IpnsHash> {
+  public async writeData(path: string, content: Buffer, identity: PrivateKey): Promise<IpnsHash> {
     await this.initializeBucketIfNecessary(identity);
 
     // const buf = Buffer.from(JSON.stringify(content, null, 2));
@@ -33,7 +33,7 @@ class TextileClient implements IpfsService {
   }
 
   // TODO: can we take the identity argument out of this for read-only operations?
-  public async lsIpns(path: string, identity: Libp2pCryptoIdentity): Promise<string[]> {
+  public async lsIpns(path: string, identity: PrivateKey): Promise<string[]> {
     await this.initializeBucketIfNecessary(identity);
     console.debug(`listPath: ${path}`);
     const res = await this.getSelectedBucket().listPath(this.selectedBucketKey, path);
@@ -41,7 +41,7 @@ class TextileClient implements IpfsService {
   }
 
   // TODO: can we take the identity argument out of this for read-only operations?
-  public async catPathJson<T>(path: string, identity: Libp2pCryptoIdentity, progress?: (num?: number) => void): Promise<T> {
+  public async catPathJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
     await this.initializeBucketIfNecessary(identity);
     console.debug(`pullPath: ${path}`);
     const request = this.getSelectedBucket().pullPath(this.selectedBucketKey, path, { progress });
@@ -49,7 +49,7 @@ class TextileClient implements IpfsService {
   }
 
   // TODO: can we take the identity argument out of this for read-only operations?
-  public async catIpfsJson<T>(path: string, identity: Libp2pCryptoIdentity, progress?: (num?: number) => void): Promise<T> {
+  public async catIpfsJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
     await this.initializeBucketIfNecessary(identity);
     console.debug(`pullIpfsPath: ${path}`);
     const request = this.getSelectedBucket().pullIpfsPath(path, { progress });
@@ -91,7 +91,7 @@ class TextileClient implements IpfsService {
     return contents_as_json;
   }
 
-  private async initializeBucketIfNecessary(identity: Libp2pCryptoIdentity) {
+  private async initializeBucketIfNecessary(identity: PrivateKey) {
     if (!this.isInitialized()) {
       const { default_key, map } = await this.initBucketMap(identity);
       this.selectedBucketKey = default_key;
@@ -103,7 +103,7 @@ class TextileClient implements IpfsService {
     return this.selectedBucketKey && this.bucketMap && this.bucketMap.size;
   }
 
-  private async initBucketMap(identity: Libp2pCryptoIdentity): Promise<{ default_key: string; map: Map<string, Buckets> }> {
+  private async initBucketMap(identity: PrivateKey): Promise<{ default_key: string; map: Map<string, Buckets> }> {
     console.debug('initializing bucket map...');
 
     const buckets = await Buckets.withKeyInfo(this.auth);

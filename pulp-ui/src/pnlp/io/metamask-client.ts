@@ -2,10 +2,9 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/keccak256';
 import { ExternalProvider, JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
-import { keys as libp2p_crypto_keys } from 'libp2p-crypto';
+import { keys as libp2p_crypto_keys, PrivateKey } from 'libp2p-crypto';
 import { BlockchainService } from 'pnlp/client';
 import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata } from 'pnlp/domain';
-import { Libp2pCryptoIdentity, PrivateKey } from 'pnlp/identity';
 import ContractJson from './pnlp.json';
 
 type WindowInstanceWithEthereum = Window & typeof globalThis & { ethereum: ExternalProvider & { request: (request: { method: string; params?: Array<any> }) => Promise<any> } };
@@ -97,25 +96,14 @@ export class MetamaskClient implements BlockchainService {
     return accounts[0];
   }
 
-  public async signText(text: string): Promise<string> {
-    return await this.signer.signMessage(text);
-  }
-
-  // TODO: figure out identity. ideally everything below here is temporary:
-
   // From https://github.com/textileio/js-threads/blob/master/packages/crypto/src/ed25519.ts
   private readonly constants = {
     PUBLIC_KEY_BYTE_LENGTH: 32,
-    PRIVATE_KEY_BYTE_LENGTH: 32,
+    PRIVATE_KEY_BYTE_LENGTH: 64,
     SEED_BYTE_LENGTH: 32,
     SIGN_BYTE_LENGTH: 64,
     HASH_BYTE_LENGTH: 64,
   };
-
-  public async generateLibp2pCryptoIdentity(ethereumAddress: EthereumAddress): Promise<Libp2pCryptoIdentity> {
-    const private_key = await this.generateKeyPair(ethereumAddress);
-    return new Libp2pCryptoIdentity(private_key);
-  }
 
   public async lookupEns(address: EthereumAddress): Promise<EnsAlias | undefined> {
     const ens_alias = this.provider.lookupAddress(address).catch(e => {
@@ -126,11 +114,31 @@ export class MetamaskClient implements BlockchainService {
   }
 
   // Modified from https://github.com/textileio/js-threads/blob/master/packages/crypto/src/ed25519.ts
-  private async generateKeyPair(ethereumAddress: EthereumAddress): Promise<PrivateKey> {
-    const key: libp2p_crypto_keys.supportedKeys.ed25519.Ed25519PrivateKey = await this.generatePrivateKey(ethereumAddress);
+  public async generatePnlpIdentity(ethereumAddress: EthereumAddress): Promise<PrivateKey> {
+    const message = this.generateMessageForEntropy(ethereumAddress, 'pnlp');
+    const signedText = await this.signText(message);
+    const hash = keccak256(signedText);
+
+    // The following line converts the hash in hex to an array of 32 integers.
+    const segment = hash
+      .replace('0x', '') // Gets rid of the '0x' prefix
+      .match(/.{2}/g); // Segments the string each two hex charachers. Each element of the array is one binary digit.
+
+    const half_array = segment?.map(hexNoPrefix => BigNumber.from('0x' + hexNoPrefix).toNumber()) || []; // Convert hex string to number
+    const array = [...half_array, ...half_array];
+    if (array?.length !== 64) {
+      throw new Error('Hash of signature is not the correct size! Something went wrong!');
+    }
+
+    // I looked through the library. This is the function that Textile uses Ed25519 deep down.
+    // I also pass 1024 bits to this function, but it appears as if it is never used!
+    // I think the number of bits is used for other crypto functions.
+    const key: libp2p_crypto_keys.supportedKeys.ed25519.Ed25519PrivateKey = await libp2p_crypto_keys.generateKeyPairFromSeed('Ed25519', Uint8Array.from(array), 1024);
+    console.log(key);
     // The above line was:
     // await libp2p_crypto_keys.supportedKeys.ed25519.generateKeyPair()
     const bytes = key.marshal();
+    console.log(bytes.length);
     const privateKey = bytes.slice(0, this.constants.PRIVATE_KEY_BYTE_LENGTH);
     const publicKey = bytes.slice(this.constants.PRIVATE_KEY_BYTE_LENGTH, this.constants.PRIVATE_KEY_BYTE_LENGTH + this.constants.PUBLIC_KEY_BYTE_LENGTH);
     return new libp2p_crypto_keys.supportedKeys.ed25519.Ed25519PrivateKey(privateKey, publicKey);
@@ -167,26 +175,8 @@ export class MetamaskClient implements BlockchainService {
     );
   }
 
-  // TODO: turn all of these classes into serializable objects that can be saved in state.
-
-  private async generatePrivateKey(ethereumAddress: EthereumAddress): Promise<libp2p_crypto_keys.supportedKeys.ed25519.Ed25519PrivateKey> {
-    const message = this.generateMessageForEntropy(ethereumAddress, 'pnlp');
-    const signedText = await this.signText(message);
-    const hash = keccak256(signedText);
-    // The following line converts the hash in hex to an array of 32 integers.
-    const segment = hash
-      .replace('0x', '') // Gets rid of the '0x' prefix
-      .match(/.{2}/g); // Segments the string each two hex charachers. Each element of the array is one binary digit.
-
-    const array = segment?.map(hexNoPrefix => BigNumber.from('0x' + hexNoPrefix).toNumber()); // Convert hex string to number
-    if (array?.length !== 32) {
-      throw new Error('Hash of signerature is not the correct size! Something bad went wrong!');
-    }
-
-    // I looked through the library. This is the function that Textile uses Ed25519 deep down.
-    // I also pass 1024 bits to this function, but it appears as if it is never used!
-    // I think the number of bits is used for other crypto functions.
-    return libp2p_crypto_keys.generateKeyPairFromSeed('Ed25519', Uint8Array.from(array), 1024);
+  private async signText(text: string): Promise<string> {
+    return await this.signer.signMessage(text);
   }
 }
 

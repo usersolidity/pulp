@@ -23,6 +23,7 @@ export function LoginPage() {
 
   const onLoginMetamask = () => {
     dispatch(actions.loadIdentity());
+    // TODO:NEXT: redirect to landing page that lists publications (if more than one) and that auto-redirects to the one publication's admin page if there is only one.
   };
 
   return (

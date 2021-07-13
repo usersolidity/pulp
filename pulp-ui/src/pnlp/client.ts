@@ -1,3 +1,4 @@
+import { PrivateKey } from 'libp2p-crypto';
 import {
   ArticleDto,
   ArticleEntity,
@@ -12,7 +13,7 @@ import {
   PublicationMetadata,
   PublicationSettingsEntity
 } from 'pnlp/domain';
-import { Libp2pCryptoIdentity, PnlpIdentity } from 'pnlp/identity';
+import { PnlpIdentity } from 'pnlp/identity';
 
 export interface BlockchainService {
   createPublication(publication_slug: string, ipns_address: IpnsHash): Promise<EthereumTransactionId>;
@@ -25,19 +26,19 @@ export interface BlockchainService {
 
   getAccount(): Promise<EthereumAddress>;
 
-  generateLibp2pCryptoIdentity(ethereumAddress: EthereumAddress): Promise<Libp2pCryptoIdentity>;
+  generatePnlpIdentity(ethereumAddress: EthereumAddress): Promise<PrivateKey>;
 
   lookupEns(address: EthereumAddress): Promise<EnsAlias | undefined>;
 }
 
 export interface IpfsService {
-  writeData(path: string, buffer: Buffer, identity: Libp2pCryptoIdentity): Promise<IpnsHash>;
+  writeData(path: string, buffer: Buffer, identity: PrivateKey): Promise<IpnsHash>;
 
-  catIpfsJson<T>(path: string, identity: Libp2pCryptoIdentity): Promise<T>;
+  catIpfsJson<T>(path: string, identity: PrivateKey): Promise<T>;
 
-  resolveIpns(ipns_hash: IpnsHash, identity: Libp2pCryptoIdentity): Promise<IpfsHash>;
+  resolveIpns(ipns_hash: IpnsHash, identity: PrivateKey): Promise<IpfsHash>;
 
-  lsIpns(path: string, identity: Libp2pCryptoIdentity): Promise<string[]>;
+  lsIpns(path: string, identity: PrivateKey): Promise<string[]>;
 }
 
 export interface SmtpService {
@@ -60,7 +61,7 @@ export class PnlpClient {
 
   public async establishIdentity(): Promise<PnlpIdentity> {
     const ethereumAddress = await this.blockchain_service.getAccount();
-    const ipns_identity = await this.blockchain_service.generateLibp2pCryptoIdentity(ethereumAddress);
+    const ipns_identity = await this.blockchain_service.generatePnlpIdentity(ethereumAddress);
 
     return {
       ipns_key: ipns_identity,
@@ -68,7 +69,7 @@ export class PnlpClient {
     };
   }
 
-  public async createPublication(publication: PublicationEntity, identity: Libp2pCryptoIdentity): Promise<PublicationDto> {
+  public async createPublication(publication: PublicationEntity, identity: PrivateKey): Promise<PublicationDto> {
     console.debug(`creating a new publication: ${JSON.stringify(publication)}`);
 
     const buffer = Buffer.from(JSON.stringify(publication, null, 2));
@@ -94,7 +95,7 @@ export class PnlpClient {
     };
   }
 
-  public async updatePublication(publication: PublicationEntity, identity: Libp2pCryptoIdentity): Promise<PublicationEntity> {
+  public async updatePublication(publication: PublicationEntity, identity: PrivateKey): Promise<PublicationEntity> {
     console.debug(`creating a new publication: ${JSON.stringify(publication)}`);
 
     const buffer = Buffer.from(JSON.stringify(publication, null, 2));
@@ -105,7 +106,7 @@ export class PnlpClient {
     return publication;
   }
 
-  public async loadPublication(publication_slug: string, identity: Libp2pCryptoIdentity): Promise<PublicationEntity> {
+  public async loadPublication(publication_slug: string, identity: PrivateKey): Promise<PublicationEntity> {
     console.debug(`fetching ${publication_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
@@ -118,7 +119,7 @@ export class PnlpClient {
     return publication;
   }
 
-  public async updatePublicationSettings(publication_slug: string, settings: PublicationSettingsEntity, identity: Libp2pCryptoIdentity): Promise<PublicationSettingsEntity> {
+  public async updatePublicationSettings(publication_slug: string, settings: PublicationSettingsEntity, identity: PrivateKey): Promise<PublicationSettingsEntity> {
     console.debug(`updating publication settings: ${JSON.stringify(settings)}`);
 
     // TODO: encrypt settings with user key
@@ -130,7 +131,7 @@ export class PnlpClient {
     return settings;
   }
 
-  public async loadPublicationSettings(publication_slug: string, identity: Libp2pCryptoIdentity): Promise<PublicationSettingsEntity> {
+  public async loadPublicationSettings(publication_slug: string, identity: PrivateKey): Promise<PublicationSettingsEntity> {
     console.debug(`fetching settings for ${publication_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
@@ -144,7 +145,7 @@ export class PnlpClient {
     return settings;
   }
 
-  public async listPublications(identity: Libp2pCryptoIdentity): Promise<string[]> {
+  public async listPublications(identity: PrivateKey): Promise<string[]> {
     console.debug(`listing publications...`);
     const files = await this.ipfs_service.lsIpns(PnlpConstant.ROOT, identity);
     if (!files) {
@@ -153,7 +154,7 @@ export class PnlpClient {
     return files.filter(f => PnlpConstant.RESERVED_NAMES.every(r => f !== r));
   }
 
-  public async publishArticle(article: ArticleEntity, identity: Libp2pCryptoIdentity): Promise<ArticleDto> {
+  public async publishArticle(article: ArticleEntity, identity: PrivateKey): Promise<ArticleDto> {
     console.debug(
       `publishing article ${article.slug}; ${article.content.title}; subtitle length ${article.content.subtitle?.length}; content length ${article.content.body.length}`,
     );
@@ -193,7 +194,7 @@ export class PnlpClient {
     };
   }
 
-  public async loadArticle(publication_slug: string, article_slug: string, identity: Libp2pCryptoIdentity): Promise<{ publication: PublicationEntity; article: ArticleDto }> {
+  public async loadArticle(publication_slug: string, article_slug: string, identity: PrivateKey): Promise<{ publication: PublicationEntity; article: ArticleDto }> {
     console.debug(`fetching article: ${publication_slug}/${article_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
