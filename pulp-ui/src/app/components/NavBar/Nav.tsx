@@ -12,7 +12,7 @@ export function Nav() {
         </LinkContainer>
       </Item>
       <Item>
-        <LinkContainer to="/login">
+        <LinkContainer to="/auth/login">
           <Button variant="light">Sign In</Button>
         </LinkContainer>
       </Item>

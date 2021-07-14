@@ -9,6 +9,10 @@ import ContractJson from './pnlp.json';
 
 type WindowInstanceWithEthereum = Window & typeof globalThis & { ethereum: ExternalProvider & { request: (request: { method: string; params?: Array<any> }) => Promise<any> } };
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export class MetamaskClient implements BlockchainService {
   private contractAbi = ContractJson.abi;
   private contractAddress: EthereumAddress = '0x7AFd6f4a0e41eb76c14090f8c6889Bd1005355C3';
@@ -33,6 +37,7 @@ export class MetamaskClient implements BlockchainService {
   }
 
   public async createPublication(publication_slug: string, ipns_hash: IpfsHash): Promise<EthereumTransactionId> {
+    await sleep(20000);
     console.debug(`creating publication on ethereum: ${publication_slug}:${ipns_hash}`);
     const transaction = await this.contract.functions.createPublication(publication_slug, ipns_hash);
     console.debug('transaction result: ', transaction);

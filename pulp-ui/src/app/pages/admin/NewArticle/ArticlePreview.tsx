@@ -1,13 +1,11 @@
+import MDEditor from '@uiw/react-md-editor';
 import { selectArticle, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
-import { ArticleForm } from 'app/pages/admin/NewArticle/ArticleForm';
-import { ArticlePreview } from 'app/pages/admin/NewArticle/ArticlePreview';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useRouteMatch } from 'react-router-dom';
 
-export function NewArticle() {
-  const { t } = useTranslation();
+export function ArticlePreview() {
   let { url } = useRouteMatch();
   let { p_slug } = useParams<{ p_slug?: string }>();
   // const showPreview = () => setShowPreview(true)
@@ -26,5 +24,20 @@ export function NewArticle() {
     dispatch(actions.setArticleApplicationState(application_state));
   };
 
-  return <div>{article?.application?.preview ? <ArticlePreview /> : <ArticleForm />}</div>;
+  return (
+    <div className="mt-4">
+      <div className="lead">{article?.entity?.title}</div>
+      <div className="text-muted mb-3">{article?.entity?.subtitle}</div>
+      <div className="text-muted small mb-3">{article?.entity?.slug}</div>
+      <MDEditor.Markdown source={article?.entity?.content} />
+      <div className="text-right">
+        <Button variant="light" className="mr-3" onClick={onTogglePreview}>
+          Edit
+        </Button>
+        <Button variant="primary" type="submit">
+          Publish
+        </Button>
+      </div>
+    </div>
+  );
 }

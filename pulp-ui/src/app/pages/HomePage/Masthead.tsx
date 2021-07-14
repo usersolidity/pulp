@@ -28,7 +28,7 @@ export function Masthead() {
             Get Started
           </Button>
         </LinkContainer>
-        <LinkContainer to="/login">
+        <LinkContainer to="/auth/login">
           <Button size="lg" variant="light">
             Sign In
           </Button>

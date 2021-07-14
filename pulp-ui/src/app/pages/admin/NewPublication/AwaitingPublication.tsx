@@ -6,114 +6,81 @@ import { ReactComponent as EthLogo } from 'app/pages/admin/assets/eth-grey.svg';
 import ipfs_logo from 'app/pages/admin/assets/ipfs-grey-64-wikimedia.png';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
 import Fade from 'react-bootstrap/Fade';
 import Media from 'react-bootstrap/Media';
-import Row from 'react-bootstrap/Row';
+import Spinner from 'react-bootstrap/Spinner';
+import { BsCheckCircle } from 'react-icons/bs';
 import { useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import styled from 'styled-components/macro';
 
 export function AwaitingPublication() {
-  const [open, setOpen] = React.useState(10);
   const publication = useSelector(selectPublication);
-
-  var interval = setInterval(function () {
-    setOpen(open + 1);
-    if (open > 3) {
-      clearInterval(interval);
-    }
-  }, 2000);
 
   return (
     <div className="mt-5">
-      <Fade in={open > 0}>
-        <div>
+      <Media className="mt-5 text-left">
+        <div style={{ width: '38px', height: '38px' }} className="mr-3">
+          {publication?.awaiting_tx ? (
+            <Spinner animation="grow" variant="primary" role="status">
+              <span className="sr-only">Loading...</span>
+            </Spinner>
+          ) : (
+            <BsCheckCircle className="text-primary h1" />
+          )}
+        </div>
+        <Media.Body>
           <h5 className="lead">Publishing to the Distributed Web</h5>
-          <p className="text-muted">This may take a little longer than you're used to on Web 2, but you didn't come for the speed.</p>
-        </div>
-      </Fade>
+          <p className="text-muted">This may take a little longer than you're used to on Web 2.</p>
+        </Media.Body>
+      </Media>
       {/* TODO: add incrementing timeout, feed messages until transaction closes */}
-      <Fade in={open > 1}>
-        <div>
-          <Media className="mt-5 text-right">
-            <Media.Body>
-              <h5 className="lead">Broadcasting to IPFS</h5>
-              <p className="text-muted">So you can commoditize your publishing house</p>
-            </Media.Body>
-            <img width={52} height={52} className="ml-3" src={ipfs_logo} alt="ipfs-logo" />
-          </Media>
-          <Media className="mt-5">
-            <EthLogo style={{ width: '52px', height: '52px' }} />
-            <Media.Body>
-              <h5 className="lead">Transacting on the Ethereum Distributed Computer</h5>
-              <p className="text-muted">So you can monetize like its 2021</p>
-            </Media.Body>
-          </Media>
+      <Media className="mt-5 text-left">
+        <img width={38} height={38} className="mr-3" src={ipfs_logo} alt="ipfs-logo" />
+        <Media.Body>
+          <h5 className="lead">Broadcasting to IPFS</h5>
+          <p className="text-muted">So you can commoditize your publishing house</p>
+        </Media.Body>
+      </Media>
+      <Media className="mt-5 text-left">
+        <EthLogo style={{ width: '38px', height: '38px' }} className="mr-3" />
+        <Media.Body>
+          <h5 className="lead">Transacting on the Ethereum Distributed Computer</h5>
+          <p className="text-muted">So you can monetize like it's 2021</p>
+        </Media.Body>
+      </Media>
+      <Media className="mt-5 text-left">
+        <div style={{ width: '38px', height: '38px' }} className="h1 mr-3">
+          🙂
         </div>
-      </Fade>
-      <Fade in={open > 2}>
-        <div>
-          <div className="mt-5 text-right">
-            <h5 className="lead">Awaiting Ethereum Transaction</h5>
-            <p className="text-muted">So you can own your authorship</p>
-          </div>
-          <div className="mt-5">
-            <h5 className="lead">While we have you</h5>
-            <p className="text-muted">
-              If we may be so <b>bold</b>
-            </p>
-          </div>
+        <Media.Body>
+          <h5 className="lead">Content Creators Love Pulp</h5>
+          <p className="text-muted">
+            Because{' '}
+            <Link to={{ pathname: 'https://linktr.ee/pulp_network' }} target="_blank">
+              Disintermediation
+            </Link>
+          </p>
+        </Media.Body>
+      </Media>
+      <div>
+        <div className="mt-5">
+          <h5 className="lead">We're In Alpha, Follow Along in our Newsletter</h5>
+          <Subscribe />
         </div>
-      </Fade>
-      <Fade in={open > 3}>
-        <div>
-          <div className="mt-5 text-right">
-            <h5 className="lead">Content Creators Love Pulp</h5>
-            <p className="text-muted">
-              Because{' '}
-              <Link to={{ pathname: 'https://linktr.ee/pulp_network' }} target="_blank">
-                Disintermediation
-              </Link>
-            </p>
-          </div>
-          <div className="mt-5">
-            <h5 className="lead">We're In Alpha, For Updates Follow Along in our Newsletter</h5>
-            <p className="text-muted">(yes, we publish on Pulp too)</p>
-          </div>
-          <Row className="mt-5 text-center">
-            <Col xs={12} md={{ span: 3, offset: 3 }}>
-              <Subscribe />
-            </Col>
-          </Row>
-        </div>
-      </Fade>
-      <Fade in={open > 4}>
-        <div>
-          <div className="mt-5 text-right">
-            <h5 className="lead">That Ethereum Transaction finished by the way</h5>
-            <p className="text-muted">
-              See it on a block explorer{' '}
-              <Link to={{ pathname: 'https://etherscan.io/tx/' + publication?.metadata?.tx }} target="_blank">
-                here
-              </Link>
-            </p>
-          </div>
-          <div className="mt-5 text-left">
-            <h5 className="lead">Time to Publish on Web 3</h5>
+      </div>
+      <Fade in={!publication?.awaiting_tx}>
+        <Media className="mt-5 text-left">
+          <LinkContainer to={'/admin/' + publication.entity.slug + '/write'} className="mr-3">
+            <Button variant="primary" size="lg">
+              Write Now
+            </Button>
+          </LinkContainer>
+          <Media.Body>
+            <h5 className="lead">Publish on Web 3</h5>
             <p className="text-muted">Leave the internet of the twentyteens behind</p>
-          </div>
-          <BottomWrapper className="mb-5 mt-5 text-center">
-            <p className="text-muted">
-              <LinkContainer to={'/admin/' + publication.entity.slug + '/write'} className="mr-3">
-                <Button variant="primary" size="lg">
-                  Write Now
-                </Button>
-              </LinkContainer>
-            </p>
-            <p className="text-muted"></p>
-          </BottomWrapper>
-        </div>
+          </Media.Body>
+        </Media>
       </Fade>
       <Footer />
     </div>

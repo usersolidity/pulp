@@ -1,6 +1,5 @@
 export interface PnlpError {
-  message: string;
-  trace?: string;
+  message: string; // TODO: this is useful in redux state but probably doesn't belong in the domain.ts. it also needs to carry more information from the Error() and not just the message
 }
 
 export class PnlpConstant {

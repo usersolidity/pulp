@@ -1,5 +1,5 @@
 /**
- * Asynchronously loads the component for LoginPage
+ * Asynchronously loads the component for AuthRoot
  */
 
 import { LoadingIndicator } from 'app/components/LoadingIndicator';
@@ -15,9 +15,9 @@ const LoadingWrapper = styled.div`
   justify-content: center;
 `;
 
-export const LoginPage = lazyLoad(
-  () => import('./LoginPage'),
-  module => module.LoginPage,
+export const AuthRoot = lazyLoad(
+  () => import('./AuthRoot'),
+  module => module.AuthRoot,
   {
     fallback: (
       <LoadingWrapper>

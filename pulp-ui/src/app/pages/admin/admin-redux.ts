@@ -2,9 +2,10 @@ import { createSelector, PayloadAction } from '@reduxjs/toolkit';
 import { pnlp_client } from 'app/pnlp-client';
 import { ArticleDto, ArticleEntity, ArticleMetadata, EnsAlias, PnlpError, PublicationDto, PublicationEntity, PublicationMetadata, PublicationSettingsEntity } from 'pnlp/domain';
 import { PnlpIdentity } from 'pnlp/identity';
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { RootState } from 'types';
 import { createSlice } from 'utils/@reduxjs/toolkit';
+import history from 'utils/history';
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 
 export interface PublicationState {
@@ -35,11 +36,14 @@ export interface PublicationSettingsState {
   entity: PublicationSettingsEntity;
 }
 
+export interface ArticleApplicationState {
+  preview: boolean;
+}
+
 export interface ArticleState {
   requested_slug: string;
 
-  draft: boolean;
-  preview: boolean; // preview == true should simply show default article view page. draft == true should add annotations to that page.
+  application: ArticleApplicationState;
 
   awaiting_tx: boolean;
   tx_error?: PnlpError;
@@ -63,11 +67,19 @@ export interface IdentityState {
   ens_alias?: string;
 }
 
+export interface CatalogueState {
+  loading: boolean;
+  load_error?: PnlpError;
+
+  entities: string[];
+}
+
 export interface AdminState {
   publication: PublicationState;
   settings: PublicationSettingsState;
   article: ArticleState;
   identity: IdentityState;
+  catalogue: CatalogueState;
 }
 
 export const initialPublicationState: PublicationState = {
@@ -100,8 +112,9 @@ export const initialSettingsState: PublicationSettingsState = {
 export const initialArticleState: ArticleState = {
   requested_slug: '',
 
-  draft: true,
-  preview: false,
+  application: {
+    preview: false,
+  },
 
   awaiting_tx: false,
   loading: false,
@@ -113,6 +126,12 @@ export const initialArticleState: ArticleState = {
   },
 };
 
+export const initialCatalogueState: CatalogueState = {
+  loading: false,
+
+  entities: [],
+};
+
 export const initialIdentityState: IdentityState = {
   loading: false,
 };
@@ -122,12 +141,26 @@ export const initialState: AdminState = {
   settings: initialSettingsState,
   article: initialArticleState,
   identity: initialIdentityState,
+  catalogue: initialCatalogueState,
 };
 
 const slice = createSlice({
   name: 'adminState',
   initialState,
   reducers: {
+    listPublications(state) {
+      state.catalogue.loading = true;
+      state.catalogue.load_error = undefined;
+    },
+    listPublicationsSuccess(state, action: PayloadAction<string[]>) {
+      state.catalogue.loading = false;
+      state.catalogue.load_error = undefined;
+      state.catalogue.entities = action.payload;
+    },
+    listPublicationsError(state, action: PayloadAction<PnlpError>) {
+      state.catalogue.loading = false;
+      state.catalogue.load_error = action.payload;
+    },
     setPublication(state, action: PayloadAction<PublicationEntity>) {
       state.publication.entity = action.payload;
     },
@@ -177,6 +210,13 @@ const slice = createSlice({
     setArticle(state, action: PayloadAction<ArticleEntity>) {
       state.article.entity = action.payload;
     },
+    setArticleContent(state, action: PayloadAction<string | undefined>) {
+      // this action only required because markdown component is outside of redux context
+      state.article.entity.content = action.payload;
+    },
+    setArticleApplicationState(state, action: PayloadAction<ArticleApplicationState>) {
+      state.article.application = action.payload;
+    },
     loadArticle(state, action: PayloadAction<string>) {
       state.article.requested_slug = action.payload;
       state.article.loading = true;
@@ -192,22 +232,16 @@ const slice = createSlice({
       state.article.load_error = action.payload;
     },
     publishArticle(state) {
-      state.article.draft = false;
-      state.article.preview = true;
       state.article.awaiting_tx = true;
       state.article.tx_error = undefined;
     },
     publishArticleSuccess(state, action: PayloadAction<ArticleDto>) {
-      state.article.draft = false;
-      state.article.preview = true;
       state.article.awaiting_tx = true;
       state.article.tx_error = undefined;
       state.article.entity = action.payload.article;
       state.article.metadata = action.payload.metadata;
     },
     publishArticleError(state, action: PayloadAction<PnlpError>) {
-      state.article.draft = true;
-      state.article.preview = false;
       state.article.awaiting_tx = false;
       state.article.tx_error = action.payload;
     },
@@ -275,6 +309,8 @@ export const selectSettings = createSelector([selectDomain], adminState => admin
 
 export const selectIdentity = createSelector([selectDomain], adminState => adminState.identity);
 
+export const selectCatalogue = createSelector([selectDomain], adminState => adminState.catalogue);
+
 export const { actions: adminActions, reducer } = slice;
 
 export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
@@ -286,6 +322,18 @@ export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
 /**
  * Begin Sagas
  */
+export function* listPublications() {
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
+
+  try {
+    const response: string[] = yield pnlp_client.listPublications(identity!.state!.ipns_key);
+    yield put(adminActions.listPublicationsSuccess(response));
+  } catch (err) {
+    yield put(adminActions.listPublicationsError({ message: err.message }));
+  }
+}
+
 export function* createPublication() {
   const publication: PublicationState = yield select(selectPublication);
   const identity: IdentityState = yield select(selectIdentity);
@@ -297,7 +345,7 @@ export function* createPublication() {
     yield pnlp_client.awaitTransaction(response.metadata.tx);
     yield put(adminActions.createPublicationSuccess(response.publication));
   } catch (err) {
-    yield put(adminActions.createPublicationError({ message: err.message, trace: err.trace }));
+    yield put(adminActions.createPublicationError({ message: err.message }));
   }
 }
 
@@ -386,6 +434,7 @@ export function* loadIdentity() {
     yield put(adminActions.loadIdentitySuccess(response));
     const alias: EnsAlias | undefined = yield pnlp_client.lookupEns(response.ethereum_address);
     yield put(adminActions.loadEnsSuccess(alias));
+    yield call([history, history.push], '/account');
   } catch (err) {
     yield put(adminActions.loadIdentityError({ message: err.message }));
   }
@@ -408,6 +457,7 @@ export function* adminSaga() {
   yield takeLatest(adminActions.updateSettings.type, updateSettings);
   yield takeLatest(adminActions.loadSettings.type, loadSettings);
   yield takeLatest(adminActions.loadIdentity.type, loadIdentity);
+  yield takeLatest(adminActions.listPublications.type, listPublications);
 }
 
 export const useAdminSlice = () => {

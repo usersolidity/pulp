@@ -9,41 +9,17 @@ export function AccountDropdown() {
   const identity = useSelector(selectIdentity);
 
   return (
-    <Wrapper>
-      <Item>
-        <LinkContainer to="/new">
-          <Button variant="primary">{identity?.state?.ethereum_address.slice(0, 4) + '...' + identity?.state?.ethereum_address.slice(-4)}</Button>
-        </LinkContainer>
-      </Item>
-    </Wrapper>
+    <>
+      <LinkContainer to="/account">
+        <Button size="sm" variant="outline-secondary">
+          {identity?.state?.ethereum_address.slice(0, 4) + '...' + identity?.state?.ethereum_address.slice(-4)}
+        </Button>
+      </LinkContainer>{' '}
+    </>
   );
 }
 
 const Wrapper = styled.nav`
   display: flex;
   margin-right: -1rem;
-`;
-
-const Item = styled.div`
-  color: ${p => p.theme.primary};
-  cursor: pointer;
-  margin: 0px;
-  text-decoration: none;
-  display: flex;
-  margin: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  align-items: center;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 0.4;
-  }
-
-  .icon {
-    margin-right: 0.25rem;
-  }
 `;

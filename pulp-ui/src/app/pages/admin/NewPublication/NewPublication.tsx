@@ -10,8 +10,12 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import { BsQuestionCircle } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
 export function NewPublication() {
+  const history = useHistory();
+  let { url } = useRouteMatch();
+
   const { actions } = useAdminSlice();
   const publication = useSelector(selectPublication);
   const dispatch = useDispatch();
@@ -40,6 +44,7 @@ export function NewPublication() {
       evt.preventDefault();
     }
     dispatch(actions.createPublication());
+    history.push(`${url}/publishing`);
   };
 
   return (
@@ -54,7 +59,7 @@ export function NewPublication() {
                 <div className="text-muted small mb-3">from your keyboard to the universe</div>
               </Col>
               <Col md={2} className="text-right">
-                <a href="/" target="_blank">
+                <a href="/docs" target="_blank">
                   <BsQuestionCircle />
                 </a>
                 {/* TODO: add docs page */}

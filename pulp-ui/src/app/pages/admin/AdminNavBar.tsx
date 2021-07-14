@@ -1,8 +1,10 @@
 import { Link } from 'app/components/Link';
 import { PageWrapper } from 'app/components/PageWrapper';
-import { selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
+import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
+import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
+import { LinkContainer } from 'react-router-bootstrap';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
@@ -12,6 +14,7 @@ export function AdminNavBar() {
   let { p_slug } = useParams<{ p_slug?: string }>();
   const { actions } = useAdminSlice();
   const publication = useSelector(selectPublication);
+  const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();
 
   return (
@@ -32,6 +35,13 @@ export function AdminNavBar() {
           </Item>
           <Item>
             <Link to={`${url}/settings`}>Settings</Link>
+          </Item>
+          <Item>
+            <LinkContainer to="/account">
+              <Button size="sm" variant="outline-secondary">
+                {identity?.state?.ethereum_address.slice(0, 4) + '...' + identity?.state?.ethereum_address.slice(-4)}
+              </Button>
+            </LinkContainer>{' '}
           </Item>
         </NavWrapper>
       </PageWrapper>
