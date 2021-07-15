@@ -314,6 +314,18 @@ export const selectIdentity = createSelector([selectDomain], adminState => admin
 
 export const selectCatalogue = createSelector([selectDomain], adminState => adminState.catalogue);
 
+export const selectIpfsLoading = createSelector([selectDomain], adminState => {
+  return adminState.catalogue.loading || adminState.publication.loading || adminState.article.loading;
+});
+
+export const selectIpfsWriting = createSelector([selectDomain], adminState => {
+  return adminState.publication.writing || adminState.article.writing;
+});
+
+export const selectAwaitingTransaction = createSelector([selectDomain], adminState => {
+  return adminState.publication.awaiting_tx || adminState.article.awaiting_tx;
+});
+
 export const { actions: adminActions, reducer } = slice;
 
 export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {

@@ -1,3 +1,4 @@
+// import { Loader } from 'app/components/NavBar/Loader';
 import { selectIdentity } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
@@ -15,6 +16,7 @@ export function NavBar() {
     <Wrapper>
       <PageWrapper>
         <Logo />
+        {/* <Loader /> */}
         {identity?.state ? <AccountDropdown /> : <Nav />}
       </PageWrapper>
     </Wrapper>
