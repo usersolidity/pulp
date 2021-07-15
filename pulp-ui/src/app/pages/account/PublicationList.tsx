@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-export function AccountDashboard() {
+export function PublicationList() {
   const { t } = useTranslation();
   const { actions } = useAdminSlice();
   const identity = useSelector(selectIdentity);
@@ -22,7 +22,6 @@ export function AccountDashboard() {
 
   return (
     <>
-      {/* TODO:NEXT add loading and error messages */}
       <div className="mt-5 text-center">
         <div className="mb-5 text-muted">
           Publications by <b>{identity?.ens_alias || identity?.state?.ethereum_address}</b>

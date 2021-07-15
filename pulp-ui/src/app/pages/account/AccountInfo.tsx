@@ -39,7 +39,6 @@ export function AccountInfo() {
                   <p className="text-muted"> {identity.ens_alias || 'N/A'}</p>
                 </div>
               </Card.Body>
-              {/* TODO: Show IPNS Address (with link to IPNS bucket) */}
               <Card.Footer className="text-left small">
                 <Link to="/docs">What are these?</Link>
               </Card.Footer>
