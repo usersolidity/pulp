@@ -31,11 +31,8 @@ export function ArticlePreview() {
       <div className="text-muted small mb-3">{article?.entity?.slug}</div>
       <MDEditor.Markdown source={article?.entity?.content} />
       <div className="text-right">
-        <Button variant="light" className="mr-3" onClick={onTogglePreview}>
-          Edit
-        </Button>
-        <Button variant="primary" type="submit">
-          Publish
+        <Button variant="outline-secondary" className="mr-3" onClick={onTogglePreview}>
+          Stop Preview
         </Button>
       </div>
     </div>

@@ -155,9 +155,7 @@ export class PnlpClient {
   }
 
   public async publishArticle(article: ArticleEntity, identity: PrivateKey): Promise<ArticleDto> {
-    console.debug(
-      `publishing article ${article.slug}; ${article.content.title}; subtitle length ${article.content.subtitle?.length}; content length ${article.content.body.length}`,
-    );
+    console.debug(`publishing article ${article.slug}; ${article.title}; subtitle length ${article.subtitle?.length}; content length ${article.content?.length}`);
 
     const article_buffer = Buffer.from(JSON.stringify(article, null, 2));
     const article_path = `${article.publication_slug}/${article.slug}`;
@@ -174,15 +172,15 @@ export class PnlpClient {
     publication.articles = publication.articles || {};
     publication.articles[article.slug] = {
       tx: transaction_hash,
-      title: article.content.title,
+      title: article.title,
       ipfs: ipfs_address,
       author: article.author,
-      subtitle: article.content.subtitle,
+      subtitle: article.subtitle,
     };
 
     const publication_buffer = Buffer.from(JSON.stringify(publication, null, 2));
     const publication_path = `${publication.slug}/${PnlpConstant.INDEX_FILENAME}`;
-    this.ipfs_service.writeData(publication_path, publication_buffer, identity);
+    await this.ipfs_service.writeData(publication_path, publication_buffer, identity);
 
     return {
       article,

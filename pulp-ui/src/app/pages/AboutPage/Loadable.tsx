@@ -2,10 +2,10 @@
  * Asynchronously loads the component for AboutPage
  */
 
-import * as React from 'react';
-import { lazyLoad } from 'utils/loadable';
 import { LoadingIndicator } from 'app/components/LoadingIndicator';
+import * as React from 'react';
 import styled from 'styled-components/macro';
+import { lazyLoad } from 'utils/loadable';
 
 const LoadingWrapper = styled.div`
   width: 100%;
@@ -16,7 +16,7 @@ const LoadingWrapper = styled.div`
 `;
 
 export const AboutPage = lazyLoad(
-  () => import('./index'),
+  () => import('./AboutPage'),
   module => module.AboutPage,
   {
     fallback: (

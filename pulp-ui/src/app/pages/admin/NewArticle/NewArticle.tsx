@@ -16,15 +16,5 @@ export function NewArticle() {
   const publication = useSelector(selectPublication);
   const dispatch = useDispatch();
 
-  const [value, setValue] = React.useState<string | undefined>('**Hello world!!!**');
-
-  const onTogglePreview = () => {
-    const application_state = {
-      ...article.application,
-      preview: !article.application.preview,
-    };
-    dispatch(actions.setArticleApplicationState(application_state));
-  };
-
   return <div>{article?.application?.preview ? <ArticlePreview /> : <ArticleForm />}</div>;
 }

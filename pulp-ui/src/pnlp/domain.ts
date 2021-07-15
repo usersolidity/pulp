@@ -106,7 +106,7 @@ export interface ArticleEntity {
   edit_of?: IpfsHash;
   retracted?: boolean;
   content_type?: string;
-  content?: any; // TODO: bytes?
+  content?: string; // TODO: bytes?
 }
 
 /**

@@ -10,7 +10,7 @@ import { AccountRoot } from 'app/pages/account/Loadable';
 import { AdminRoot } from 'app/pages/admin/AdminRoot/Loadable';
 import { NewPublicationRoot } from 'app/pages/admin/NewPublication/Loadable';
 import { AuthRoot } from 'app/pages/auth/Loadable';
-import { ReadRoot } from 'app/pages/read/ReadRoot/Loadable';
+import { ReadRoot } from 'app/pages/read/Loadable';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
@@ -30,13 +30,13 @@ export function App() {
       </Helmet>
 
       <Switch>
-        <Route exact path={process.env.PUBLIC_URL + '/'} component={HomePage} />
-        <Route exact path={process.env.PUBLIC_URL + '/about'} component={AboutPage} />
-        <Route path={process.env.PUBLIC_URL + '/new'} component={NewPublicationRoot} />
-        <Route path={process.env.PUBLIC_URL + '/auth'} component={AuthRoot} />
-        <Route path={process.env.PUBLIC_URL + '/account'} component={AccountRoot} />
-        <Route path={process.env.PUBLIC_URL + '/admin/:p_slug'} component={AdminRoot} />
-        <Route path={process.env.PUBLIC_URL + '/read/:p_slug'} component={ReadRoot} />
+        <Route exact path={`${process.env.PUBLIC_URL}/`} component={HomePage} />
+        <Route exact path={`${process.env.PUBLIC_URL}/about`} component={AboutPage} />
+        <Route path={`${process.env.PUBLIC_URL}/new`} component={NewPublicationRoot} />
+        <Route path={`${process.env.PUBLIC_URL}/auth`} component={AuthRoot} />
+        <Route path={`${process.env.PUBLIC_URL}/account`} component={AccountRoot} />
+        <Route path={`${process.env.PUBLIC_URL}/admin/:p_slug`} component={AdminRoot} />
+        <Route path={`${process.env.PUBLIC_URL}/read/:p_slug`} component={ReadRoot} />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />

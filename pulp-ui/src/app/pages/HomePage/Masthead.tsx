@@ -1,12 +1,16 @@
 import { A } from 'app/components/A';
+import { selectIdentity } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
+import { useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import styled from 'styled-components/macro';
 import { Lead } from './components/Lead';
 import { Title } from './components/Title';
 
 export function Masthead() {
+  const identity = useSelector(selectIdentity);
+
   return (
     <Wrapper>
       {/* <Logos /> */}
@@ -23,13 +27,13 @@ export function Masthead() {
         .
       </Lead>
       <div>
-        <LinkContainer to="/new" className="mr-3">
+        <LinkContainer to={identity?.state ? '/new' : '/about'} className="mr-3">
           <Button size="lg" variant="primary">
             Get Started
           </Button>
         </LinkContainer>
         <LinkContainer to="/auth/login">
-          <Button size="lg" variant="light">
+          <Button size="lg" variant="outline-secondary">
             Sign In
           </Button>
         </LinkContainer>
@@ -39,7 +43,7 @@ export function Masthead() {
 }
 
 const Wrapper = styled.main`
-  height: 60vh;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   align-items: left;

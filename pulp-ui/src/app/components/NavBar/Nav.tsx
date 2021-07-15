@@ -1,19 +1,22 @@
+import { selectIdentity } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
+import { useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import styled from 'styled-components/macro';
 
 export function Nav() {
+  const identity = useSelector(selectIdentity);
   return (
     <Wrapper>
       <Item>
-        <LinkContainer to="/new">
+        <LinkContainer to={identity?.state ? '/new' : '/about'}>
           <Button variant="primary">Get Started</Button>
         </LinkContainer>
       </Item>
       <Item>
         <LinkContainer to="/auth/login">
-          <Button variant="light">Sign In</Button>
+          <Button variant="outline-secondary">Sign In</Button>
         </LinkContainer>
       </Item>
     </Wrapper>

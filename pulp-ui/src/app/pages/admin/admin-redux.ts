@@ -217,6 +217,9 @@ const slice = createSlice({
     setArticleApplicationState(state, action: PayloadAction<ArticleApplicationState>) {
       state.article.application = action.payload;
     },
+    setArticleMetadata(state, action: PayloadAction<ArticleMetadata>) {
+      state.article.metadata = action.payload;
+    },
     loadArticle(state, action: PayloadAction<string>) {
       state.article.requested_slug = action.payload;
       state.article.loading = true;
@@ -381,6 +384,8 @@ export function* publishArticle() {
 
   try {
     const response: ArticleDto = yield pnlp_client.publishArticle(article.entity, identity!.state!.ipns_key);
+    yield put(adminActions.setArticleMetadata(response.metadata));
+    yield pnlp_client.awaitTransaction(response.metadata.tx);
     yield put(adminActions.publishArticleSuccess(response));
   } catch (err) {
     yield put(adminActions.publishArticleError({ message: err.message }));

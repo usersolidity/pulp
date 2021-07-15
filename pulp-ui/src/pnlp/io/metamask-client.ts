@@ -37,7 +37,6 @@ export class MetamaskClient implements BlockchainService {
   }
 
   public async createPublication(publication_slug: string, ipns_hash: IpfsHash): Promise<EthereumTransactionId> {
-    await sleep(20000);
     console.debug(`creating publication on ethereum: ${publication_slug}:${ipns_hash}`);
     const transaction = await this.contract.functions.createPublication(publication_slug, ipns_hash);
     console.debug('transaction result: ', transaction);

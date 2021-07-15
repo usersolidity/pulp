@@ -36,7 +36,7 @@ export function LoginPage() {
               <Card.Header className="title">{t(content.signIn())}</Card.Header>
               <Card.Body>
                 <div className="mb-3">
-                  <Button block size="lg" variant="light" onClick={onLoginMetamask}>
+                  <Button block size="lg" variant="outline-secondary" onClick={onLoginMetamask}>
                     <MetamaskLogo style={{ width: '1.25rem', height: '1.25rem' }} /> Metamask
                   </Button>
                 </div>

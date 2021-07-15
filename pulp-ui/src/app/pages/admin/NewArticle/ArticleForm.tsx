@@ -114,7 +114,7 @@ export function ArticleForm() {
         </Form.Group>
 
         <div className="text-right">
-          <Button variant="light" className="mr-3" onClick={onTogglePreview}>
+          <Button variant="outline-secondary" className="mr-3" onClick={onTogglePreview}>
             Preview
           </Button>
           <Button variant="primary" type="submit">
