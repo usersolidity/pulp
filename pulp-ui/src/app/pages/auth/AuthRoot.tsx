@@ -1,4 +1,4 @@
-import { NavBar } from 'app/components/NavBar';
+import { NavBar } from 'app/components/NavBar/Navbar';
 import { PageWrapper } from 'app/components/PageWrapper';
 import { LoginPage } from 'app/pages/auth/LoginPage';
 import { LogoutPage } from 'app/pages/auth/LogoutPage';

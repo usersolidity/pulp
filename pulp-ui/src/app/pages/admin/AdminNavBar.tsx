@@ -77,7 +77,7 @@ const TitleWrapper = styled.div`
 `;
 
 const Title = styled.a`
-  font-size: 1.25rem;
+  font-size: 1.6rem;
   color: ${p => p.theme.primary};
   font-weight: bold;
   margin-right: 1rem;

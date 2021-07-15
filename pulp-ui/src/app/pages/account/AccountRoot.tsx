@@ -1,7 +1,9 @@
-import { NavBar } from 'app/components/NavBar';
+import { NavBar } from 'app/components/NavBar/Navbar';
 import { PageWrapper } from 'app/components/PageWrapper';
 import { AccountDashboard } from 'app/pages/account/AccountDashboard';
 import { AccountInfo } from 'app/pages/account/AccountInfo';
+import { AwaitingPublication } from 'app/pages/account/AwaitingPublication';
+import { NewPublication } from 'app/pages/account/NewPublication';
 import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -41,6 +43,8 @@ export function AccountRoot() {
       <PageWrapper>
         <Switch>
           <Route exact path={`${url}`} component={AccountDashboard} />
+          <Route exact path={`${url}/new`} component={NewPublication} />
+          <Route exact path={`${url}/publishing`} component={AwaitingPublication} />
           <Route exact path={`${url}/info`} component={AccountInfo} />
         </Switch>
       </PageWrapper>

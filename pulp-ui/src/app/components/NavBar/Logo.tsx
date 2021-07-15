@@ -5,9 +5,11 @@ import styled from 'styled-components/macro';
 export function Logo() {
   return (
     <Wrapper>
-      <LinkContainer to="/">
-        <Title>pulp</Title>
-      </LinkContainer>
+      <LogoContainer>
+        <LinkContainer to="/">
+          <Title>pulp</Title>
+        </LinkContainer>
+      </LogoContainer>
       <Description>Publish on Web 3</Description>
     </Wrapper>
   );
@@ -18,8 +20,13 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 
+const LogoContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const Title = styled.a`
-  font-size: 1.25rem;
+  font-size: 1.6rem;
   color: ${p => p.theme.primary};
   font-weight: bold;
   margin-right: 1rem;
