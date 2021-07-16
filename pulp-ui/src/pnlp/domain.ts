@@ -97,7 +97,7 @@ export interface StatsEntity {
  * all public Article data lives here
  */
 export interface ArticleEntity {
-  publication_slug: IpnsHash;
+  publication_slug: string;
   slug: string;
   publication?: IpnsHash;
   author?: EthereumAddress;

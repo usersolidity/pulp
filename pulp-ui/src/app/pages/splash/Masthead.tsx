@@ -27,7 +27,7 @@ export function Masthead() {
         .
       </Lead>
       <div>
-        <LinkContainer to={identity?.state ? '/new' : '/about'} className="mr-3">
+        <LinkContainer to={identity?.state ? '/account/new' : '/about'} className="mr-3">
           <Button size="lg" variant="primary">
             Get Started
           </Button>

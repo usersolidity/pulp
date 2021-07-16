@@ -1,5 +1,5 @@
 import MDEditor from '@uiw/react-md-editor';
-import { selectArticle, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
+import { selectArticle, selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import { ArticleEntity } from 'pnlp/domain';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
@@ -15,6 +15,7 @@ export function ArticleForm() {
   const { actions } = useAdminSlice();
   const article = useSelector(selectArticle);
   const publication = useSelector(selectPublication);
+  const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();
 
   const onChangeArticle = (value: Partial<ArticleEntity>) => {
@@ -43,6 +44,20 @@ export function ArticleForm() {
     }
     dispatch(actions.publishArticle());
   };
+
+  const useEffectOnMount = (effect: React.EffectCallback) => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    React.useEffect(effect, []);
+  };
+
+  // set the article author on mount
+  useEffectOnMount(() => {
+    onChangeArticle({
+      author: identity.state?.ethereum_address,
+      publication_slug: publication?.entity?.slug,
+      publication: publication?.metadata?.ipns,
+    });
+  });
 
   return (
     <div>

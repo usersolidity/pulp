@@ -312,7 +312,14 @@ export const selectSettings = createSelector([selectDomain], adminState => admin
 
 export const selectIdentity = createSelector([selectDomain], adminState => adminState.identity);
 
+export const selectMe = createSelector(
+  [selectDomain],
+  adminState => adminState.identity?.ens_alias || `${adminState.identity?.state?.ethereum_address.slice(0, 4)}..${adminState.identity?.state?.ethereum_address.slice(-3)}`,
+);
+
 export const selectCatalogue = createSelector([selectDomain], adminState => adminState.catalogue);
+
+export const selectNewAccount = createSelector([selectDomain], adminState => !adminState.catalogue?.loading && !adminState.catalogue.entities?.length);
 
 export const selectIpfsLoading = createSelector([selectDomain], adminState => {
   return adminState.catalogue.loading || adminState.publication.loading || adminState.article.loading;
@@ -391,6 +398,7 @@ export function* loadPublication() {
 }
 
 export function* publishArticle() {
+  const publication: ArticleState = yield select(selectPublication);
   const article: ArticleState = yield select(selectArticle);
   const identity: IdentityState = yield select(selectIdentity);
 
@@ -399,6 +407,7 @@ export function* publishArticle() {
     yield put(adminActions.setArticleMetadata(response.metadata));
     yield pnlp_client.awaitTransaction(response.metadata.tx);
     yield put(adminActions.publishArticleSuccess(response));
+    yield call([history, history.push], `/admin/${publication.entity.slug}/history`);
   } catch (err) {
     yield put(adminActions.publishArticleError({ message: err.message }));
   }

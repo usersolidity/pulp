@@ -10,7 +10,7 @@ export function Nav() {
   return (
     <Wrapper>
       <Item>
-        <LinkContainer to={identity?.state ? '/new' : '/about'}>
+        <LinkContainer to={identity?.state ? '/account/new' : '/about'}>
           <Button variant="primary">Get Started</Button>
         </LinkContainer>
       </Item>

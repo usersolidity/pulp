@@ -1,3 +1,4 @@
+import { Footer } from 'app/components/Footer';
 import { PageWrapper } from 'app/components/PageWrapper';
 import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import { AdminNavBar } from 'app/pages/admin/AdminNavBar';
@@ -55,6 +56,7 @@ export function AdminRoot() {
           </Route>
         </Switch>
       </PageWrapper>
+      <Footer />
     </>
   );
 }

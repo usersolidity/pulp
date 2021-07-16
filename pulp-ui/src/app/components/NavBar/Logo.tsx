@@ -26,7 +26,7 @@ const LogoContainer = styled.div`
 `;
 
 const Title = styled.a`
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   color: ${p => p.theme.primary};
   font-weight: bold;
   margin-right: 1rem;
