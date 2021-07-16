@@ -3,24 +3,23 @@
 The reference implementation of a Publisher.
 
 
-TODO:
+# TODO
 
-##### Factor out etherscan address into environment variable
+###### Factor out etherscan address into environment variable
 
+###### ArticleRead needs formatting work
 
-##### ArticleRead needs formatting work
+###### Icons/Images
 
-##### Icons/Images
-
-##### Publication History page (PublicationDashboard)
+###### Publication History page (PublicationDashboard)
 - list article history and metadata
 - show author info
 
-##### Publication Settings page
+###### Publication Settings page
 - list article history and metadata
 - show author info
 
-##### add error messages
+###### add error messages
 - add className="text-error sm" error messages to each page where any async action happens and display the *.entity.[load_error | tx_error].message for each one:
 - ArticleForm, AwaitingPublication, Sign In, ArticleRead, PublicationList
 
@@ -39,17 +38,17 @@ TODO:
 - if (show_tech) { show links inline in appropriate places in UI }
 
 
-##### add small loading signal on NavBar
+###### add small loading signal on NavBar
 - to NavBar, AdminNavbar, ReadNavbar
 - keep it on DL
 - explain it on click: Web 3 transactions take longer than usual, thus we will move things along, but this indicator shows if communation is happening with eth or ipfs.
 
-##### polish /account page
+###### polish /account page
 - add a loader, change header to be a little more substantial
 - move the "Create" button to the top right corner
 
-##### create basic /docs page
+###### create basic /docs page
 - use about page as format and just include anchor links
 - search for BsQuestionCircle and create doc to reflect each one
 
-##### rename admin-redux and move out of admin directory
+###### rename admin-redux and move out of admin directory

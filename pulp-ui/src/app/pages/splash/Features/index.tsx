@@ -1,4 +1,3 @@
-import { Footer } from 'app/components/Footer';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components/macro';
@@ -44,7 +43,7 @@ export function Features() {
         <Feature>
           <CSSIcon className="feature-icon" />
           <Content>
-            <SubTitle>Monetize like it's 2030</SubTitle>
+            <SubTitle>Monetize like it's 2021</SubTitle>
             <P>
               Did we mention <strong>pnlp</strong> interoperates with the <strong>Ethereum</strong> blockchain? With a smart contract platform as your native payment channel, your
               billing model options just got a whole lot... richer.
@@ -77,7 +76,6 @@ export function Features() {
           </Content>
         </Feature>
       </List>
-      <Footer />
     </>
   );
 }

@@ -24,7 +24,7 @@ export function AboutPage() {
       <NavBar />
       <PageWrapper>
         <Wrapper>
-          <Title>Welcome to the Future of Publishing</Title>
+          <Title>The Future of Publishing Awaits (Nobody)</Title>
           <Lead className="mt-4">Already familiar with decentralized apps?</Lead>
           <Lead className="mt-3">
             <LinkContainer to="/auth/login" className="mr-3">
@@ -61,7 +61,7 @@ export function AboutPage() {
               <SubTitle>A Fat Protocol</SubTitle>
               <P>
                 Recent advances in smart contract platforms like <strong>Ethereum</strong> and distributed storage protocols like <strong>IPFS</strong> have paved the way for a
-                categorically new class of applications.
+                new, architecturally unique class of applications that puts content creators in control of their own destiny.
               </P>
               <P>
                 We've composed these protocols and others into a new publishing model: <strong>pnlp</strong>.
@@ -84,13 +84,13 @@ export function AboutPage() {
                 The biggest change in user experience from the traditional web is the "login flow". Rather than authenticating with a centralized server in traditional terms, you
                 use a public/private keypair to interact with the <strong>pnlp</strong> protocol.
               </P>
-              <P>Luckily, Metamask is a browser plugin that makes this straightforward.</P>
+              <P>Metamask is a browser plugin that makes this straightforward.</P>
               <P>
                 So before using <span className="text-primary">pulp</span>, you'll need to install{' '}
                 <ExternalLink href="https://metamask.io/" target="_blank">
                   Metamask
                 </ExternalLink>
-                . Be sure to closely follow their privacy instructions to make sure your data stays secure and accessible.
+                . Be sure to closely follow their security instructions to make sure your data stays secure and accessible.
               </P>
               <P>
                 <strong>Pulp cannot recover your data if you lose access to your Metamask key!</strong>
@@ -111,7 +111,7 @@ export function AboutPage() {
               <Subscribe />
             </Content>
           </Feature>
-          <Lead className="mt-4 text-center">So Go On... Get Started!</Lead>
+          <Lead className="mt-4 text-center">So Get Started!</Lead>
           <div className="text-center">
             <LinkContainer to="/auth/login" className="mb-5">
               <Button size="lg" variant="outline-secondary">
