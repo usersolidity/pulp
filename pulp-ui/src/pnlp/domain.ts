@@ -4,7 +4,7 @@ export interface PnlpError {
 
 export class PnlpConstant {
   public static INDEX_FILENAME = '.pnlp.json';
-  public static SETTINGS_FILENAME = '.pnlp.private.json';
+  public static SETTINGS_FILENAME = '.pnlp.author.json';
   public static RESERVED_NAMES = [PnlpConstant.INDEX_FILENAME, PnlpConstant.SETTINGS_FILENAME, '.textileseed', '.pnlp'];
   public static ROOT = '/';
 }
@@ -24,6 +24,12 @@ export type SmsAddress = string;
 export type TwitterAddress = string;
 export type BitcloutAddress = string;
 
+export type FriendlyName = string;
+
+export function friendlyName(ethereum_address?: EthereumAddress, ens_alias?: EnsAlias) {
+  return ens_alias || ethereum_address ? `${ethereum_address?.slice(0, 4)}..${ethereum_address?.slice(-3)}` : '0x0000';
+}
+
 /**
  * Corresponds to an IPFS file,
  * all public Publication data lives here
@@ -31,7 +37,7 @@ export type BitcloutAddress = string;
 export interface PublicationEntity {
   slug: string;
   previous_version?: IpfsHash;
-  publisher: EthereumAddress;
+  founder: EthereumAddress;
   articles: {
     [article_slug: string]: ArticleSummaryEntity;
   };
@@ -115,7 +121,7 @@ export interface ArticleEntity {
 export interface PublicationMetadata {
   ipns: IpnsHash;
   tx: EthereumTransactionId;
-  publisher: EthereumAddress;
+  founder: EthereumAddress;
   timestamp: Date;
 }
 
@@ -133,4 +139,9 @@ export interface ArticleDto {
 export interface PublicationDto {
   publication: PublicationEntity;
   metadata: PublicationMetadata;
+}
+
+export interface ArticleSlug {
+  article_slug: string;
+  publication_slug: string;
 }

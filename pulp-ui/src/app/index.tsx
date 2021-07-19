@@ -33,8 +33,8 @@ export function App() {
         <Route exact path={`${process.env.PUBLIC_URL}/about`} component={LoadableAboutPage} />
         <Route path={`${process.env.PUBLIC_URL}/auth`} component={LoadableAuthRoot} />
         <Route path={`${process.env.PUBLIC_URL}/account`} component={LoadableAccountRoot} />
-        <Route path={`${process.env.PUBLIC_URL}/admin/:p_slug`} component={LoadableAdminRoot} />
-        <Route path={`${process.env.PUBLIC_URL}/read/:p_slug`} component={LoadableReadRoot} />
+        <Route path={`${process.env.PUBLIC_URL}/admin/:publication_slug`} component={LoadableAdminRoot} />
+        <Route path={`${process.env.PUBLIC_URL}/read/:publication_slug`} component={LoadableReadRoot} />
         <Route component={LoadableNotFoundPage} />
       </Switch>
       <GlobalStyle />

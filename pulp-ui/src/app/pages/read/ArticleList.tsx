@@ -1,36 +1,66 @@
-import { selectIdentity, selectPublication } from 'app/pages/admin/admin-redux';
+import { selectFounderFriendlyName, selectPublication } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
-import ListGroup from 'react-bootstrap/ListGroup';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components/macro';
 
 export function ArticleList() {
-  const identity = useSelector(selectIdentity);
   const publication = useSelector(selectPublication);
   const history = useHistory();
+  const founder_friendly_name = useSelector(selectFounderFriendlyName);
 
-  const onSelect = (p_slug: string, a_slug: string) => {
-    history.push(`/read/${p_slug}/${a_slug}`);
+  const onSelect = (publication_slug: string, article_slug: string) => {
+    history.push(`/read/${publication_slug}/on/${article_slug}`);
   };
 
   return (
     <>
-      {/* TODO:NEXT add loading and error messages */}
-      <div className="mt-5 text-center">
-        <div className="mb-5 text-muted">
-          Publications by <b>{identity?.ens_alias || identity?.state?.ethereum_address}</b>
-        </div>
-        <div>{publication.loading ? 'Loading...' : ''}</div>
-        <div>{publication.load_error ? 'Error loading publications: ' + publication.load_error.message : ''}</div>
-        <div>{!publication.loading && !publication.entity ? 'This publication does not exist' : ''}</div>
-        <ListGroup variant="flush" className="mt-4 mb-4">
-          {Object.entries(publication.entity.articles).map(([slug, a], i) => (
-            <ListGroup.Item action onClick={e => onSelect(publication.entity.slug, slug)} className="text-muted lead" key={slug}>
-              {a.title}
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
-      </div>
+      <div className="small text-muted mt-3">/pnlp/read/{publication.entity.slug}</div>
+      <div className="text-muted mt-1">{publication.entity.properties.tagline}</div>
+      <div className="lead mt-1">By: {founder_friendly_name}</div>
+      <List>
+        {Object.entries(publication.entity.articles).map(([s, a], i) => (
+          <Feature onClick={() => onSelect(publication.entity.slug, s)}>
+            {/* <CSSIcon className="feature-icon" /> */}
+            <Content>
+              <div className="lead">{a.title}</div>
+              <div className="lead text-muted">{a.subtitle}</div>
+              <div className="text-muted small">By: {a.author}</div>
+            </Content>
+          </Feature>
+        ))}
+      </List>
     </>
   );
 }
+
+const Feature = styled.li`
+  display: flex;
+  margin: 6.25rem 0 6.25rem 2.25rem;
+
+  .feature-icon {
+    width: 6.25rem;
+    height: 6.25rem;
+    margin-right: 2.25rem;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    text-decoration: none;
+    color: ${p => p.theme.primary};
+    opacity: 0.8;
+    cursor: pointer;
+  }
+
+  &:active {
+    opacity: 0.4;
+  }
+`;
+const Content = styled.div`
+  flex: 1;
+`;
+
+const List = styled.ul`
+  padding: 0;
+  margin: 6.25rem 0 0 0;
+`;

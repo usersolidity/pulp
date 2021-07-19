@@ -1,5 +1,6 @@
 import { Buckets, KeyInfo, Links, PrivateKey } from '@textile/hub';
 import axios from 'axios';
+import { create } from 'ipfs-http-client';
 import { IpfsService } from 'pnlp/client';
 import { IpfsHash, IpnsHash } from 'pnlp/domain';
 
@@ -7,6 +8,13 @@ class TextileClient implements IpfsService {
   private bucketMap: Map<string, Buckets> = new Map();
 
   private selectedBucketKey!: string;
+
+  private ipfs_client = create({
+    url: 'https://dweb.link',
+    // headers: {
+    //   Origin: 'http://localhost:3000',
+    // },
+  });
 
   // TODO:11: pull this out into environment.ts
   // this is an insecure key from textile hub. it is okay to share and publish on github.
@@ -40,19 +48,31 @@ class TextileClient implements IpfsService {
   }
 
   // TODO: can we take the identity argument out of this for read-only operations?
-  public async catPathJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
-    await this.initializeBucketIfNecessary(identity);
-    console.debug(`pullPath: ${path}`);
-    const request = this.getSelectedBucket().pullPath(this.selectedBucketKey, path, { progress });
-    return await this.convertRequestToJson(request);
-  }
+  // public async catPathJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
+  //   await this.initializeBucketIfNecessary(identity);
+  //   console.debug(`catPathJson: ${path}`);
+  //   const request = this.getSelectedBucket().pullPath(this.selectedBucketKey, path, { progress });
+  //   return this.convertIpfsRequestToJson(request);
+  //   // const stream = this.ipfs_client.cat(path);
+  //   // return await this.convertIpfsRequestToJson(stream);
+  // }
 
   // TODO: can we take the identity argument out of this for read-only operations?
-  public async catIpfsJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
-    await this.initializeBucketIfNecessary(identity);
+  // public async catIpfsJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
+  //   await this.initializeBucketIfNecessary(identity);
+  //   console.debug(`pullIpfsPath: ${path}`);
+  //   // const request = this.getSelectedBucket().pullIpfsPath(path, { progress });
+  //   // return this.convertRequestToJson(request);
+  //   const stream = this.ipfs_client.cat(path);
+  //   return this.convertIpfsRequestToJson(stream);
+  // }
+
+  public async catIpfsJson<T>(path: string, identity?: PrivateKey, progress?: (num?: number) => void): Promise<T> {
     console.debug(`pullIpfsPath: ${path}`);
-    const request = this.getSelectedBucket().pullIpfsPath(path, { progress });
-    return await this.convertRequestToJson(request);
+    // const request = this.getSelectedBucket().pullIpfsPath(path, { progress });
+    // return this.convertRequestToJson(request);
+    const stream = this.ipfs_client.cat(path);
+    return this.convertIpfsRequestToJson(stream);
   }
 
   /**
@@ -62,6 +82,9 @@ class TextileClient implements IpfsService {
    * @param ipns_hash
    */
   public async resolveIpns(ipns_hash: IpnsHash): Promise<IpfsHash> {
+    if (!ipns_hash) {
+      throw new Error('ipns_hash required: ' + ipns_hash);
+    }
     const response = await axios.get(`https://${ipns_hash}.ipns.hub.textile.io/`, {
       headers: {
         Accept: 'text/html',
@@ -86,8 +109,23 @@ class TextileClient implements IpfsService {
   private async convertRequestToJson<T>(request: AsyncIterableIterator<Uint8Array>): Promise<T> {
     const { value } = await request.next();
     const res = new TextDecoder('utf-8').decode(value);
-    const contents_as_json: T = JSON.parse(res);
-    return contents_as_json;
+    return JSON.parse(res) as T;
+  }
+
+  private async convertIpfsRequestToJson<T>(stream: AsyncIterable<Uint8Array>): Promise<T> {
+    let local = new Uint8Array([]);
+
+    for await (const chunk of stream) {
+      // this is potentially an expensive buffer here... probably not a problem early though. TODO
+      var temp = new Uint8Array(local.length + chunk.length);
+      temp.set(local);
+      temp.set(chunk, local.length);
+
+      local = new Uint8Array(temp);
+    }
+    const decoded = new TextDecoder('utf-8').decode(local);
+    const result: T = JSON.parse(decoded);
+    return result;
   }
 
   private async initializeBucketIfNecessary(identity: PrivateKey) {

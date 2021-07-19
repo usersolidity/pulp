@@ -1,11 +1,11 @@
-import { selectMe } from 'app/pages/admin/admin-redux';
+import { selectUserFriendlyName } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import { useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 
 export function AccountDropdown() {
-  const me = useSelector(selectMe);
+  const me = useSelector(selectUserFriendlyName);
 
   return (
     <>

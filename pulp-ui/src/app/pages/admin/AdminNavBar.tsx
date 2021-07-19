@@ -11,7 +11,7 @@ import { StyleConstants } from 'styles/StyleConstants';
 
 export function AdminNavBar() {
   let { url } = useRouteMatch();
-  let { p_slug } = useParams<{ p_slug?: string }>();
+  let { publication_slug } = useParams<{ publication_slug?: string }>();
   const { actions } = useAdminSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
@@ -21,20 +21,22 @@ export function AdminNavBar() {
     <Wrapper>
       <PageWrapper>
         <TitleWrapper>
-          <Title href="/">{publication?.entity?.properties?.title}</Title>
+          <Link to={`/read/${publication_slug}`}>
+            <Title>{publication?.entity?.properties?.title}</Title>
+          </Link>
         </TitleWrapper>
         <NavWrapper>
           <Item>
-            <Link to={`${url}/write`}>Write</Link>
+            <Link to={`/admin/${publication_slug}/write`}>Write</Link>
           </Item>
           <Item>
-            <Link to={`${url}/history`}>History</Link>
+            <Link to={`/read/${publication_slug}`}>History</Link>
           </Item>
           <Item>
-            <Link to={`${url}/subscribers`}>Subscribers</Link>
+            <Link to={`/admin/${publication_slug}/subscribers`}>Subscribers</Link>
           </Item>
           <Item>
-            <Link to={`${url}/settings`}>Settings</Link>
+            <Link to={`/admin/${publication_slug}/settings`}>Settings</Link>
           </Item>
           <Item>
             <LinkContainer to="/account">
@@ -76,7 +78,7 @@ const TitleWrapper = styled.div`
   align-items: center;
 `;
 
-const Title = styled.a`
+const Title = styled.span`
   font-size: 1.3rem;
   color: ${p => p.theme.primary};
   font-weight: bold;

@@ -15,7 +15,7 @@ function sleep(ms) {
 
 export class MetamaskClient implements BlockchainService {
   private contractAbi = ContractJson.abi;
-  private contractAddress: EthereumAddress = '0x895AEC829040FcF84de5710662c85E64b08fB1fB';
+  private contractAddress: EthereumAddress = '0x93F9C9E3336A88949f3b5C8eA6764bb472a4e1b7';
 
   private provider: Web3Provider;
   private signer: JsonRpcSigner;
@@ -50,7 +50,7 @@ export class MetamaskClient implements BlockchainService {
   public async getPublication(publication_slug: string): Promise<PublicationMetadata> {
     type EthereumPublication = [string, string, BigNumber] & {
       ipnsHash: string;
-      author: string;
+      founder: string;
       timestamp: BigNumber;
     };
     console.debug(`fetching publication ${publication_slug} from ethereum blockchain...`);
@@ -64,17 +64,17 @@ export class MetamaskClient implements BlockchainService {
     }
 
     // If a publication_slug does not exist, throw
-    if (publication.ipnsHash === '' && publication.author === '0x0000000000000000000000000000000000000000' && publication.timestamp.toHexString() === '0x00') {
+    if (publication.ipnsHash === '' && publication.founder === '0x0000000000000000000000000000000000000000' && publication.timestamp.toHexString() === '0x00') {
       throw new Error('Publication does not exist');
     }
 
     // TODO:PUBLICATION_AUTHOR:
-    console.debug(`found publication at ${publication.ipnsHash} published by ${publication.author} on ${publication.timestamp}`);
+    console.debug(`found publication at ${publication.ipnsHash} published by ${publication.founder} on ${publication.timestamp}`);
 
     return {
       ipns: publication.ipnsHash.replace('ipns/', ''), // TODO: we should remove the prefix from the contract
       tx: 'TODO',
-      publisher: publication.author, // TODO: we should rename the contract author to publisher
+      founder: publication.founder,
       timestamp: new Date(publication.timestamp.toNumber() * 1000),
     };
   }

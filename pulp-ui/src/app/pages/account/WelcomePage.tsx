@@ -1,7 +1,7 @@
 import { ExternalLink } from 'app/components/ExternalLink';
 import { Lead } from 'app/components/Lead';
 import { Title } from 'app/components/Title';
-import { selectCatalogue, selectIdentity, selectMe, useAdminSlice } from 'app/pages/admin/admin-redux';
+import { selectCatalogue, selectIdentity, selectUserFriendlyName, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import Fade from 'react-bootstrap/Fade';
@@ -15,7 +15,7 @@ export function WelcomePage() {
   const { t } = useTranslation();
   const { actions } = useAdminSlice();
   const identity = useSelector(selectIdentity);
-  const me = useSelector(selectMe);
+  const me = useSelector(selectUserFriendlyName);
   const catalogue = useSelector(selectCatalogue);
   const isNewAccount = false; // useSelector(selectNewAccount);
   const dispatch = useDispatch();

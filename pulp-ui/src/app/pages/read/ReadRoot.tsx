@@ -3,6 +3,8 @@ import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admi
 import { AdminNavBar } from 'app/pages/admin/AdminNavBar';
 import { ArticleList } from 'app/pages/read/ArticleList';
 import { ArticleRead } from 'app/pages/read/ArticleRead';
+import { ReadNavBar } from 'app/pages/read/ReadNavBar';
+import { SubscribeForm } from 'app/pages/read/SubscribeForm';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,7 +12,7 @@ import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-route
 
 export function ReadRoot() {
   let { url } = useRouteMatch();
-  let { p_slug } = useParams<{ p_slug?: string }>();
+  let { publication_slug } = useParams<{ publication_slug?: string }>();
   const { actions } = useAdminSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
@@ -24,8 +26,8 @@ export function ReadRoot() {
 
   // TODO:NEXT: this doesn't get called every time so we don't reload publication on route change
   useEffectOnMount(() => {
-    if (p_slug) {
-      dispatch(actions.loadPublication(p_slug));
+    if (publication_slug) {
+      dispatch(actions.loadPublication(publication_slug));
     }
   });
 
@@ -35,11 +37,12 @@ export function ReadRoot() {
         <title>Sign In</title>
         <meta name="description" content="Sign in to use Pulp" />
       </Helmet>
-      <AdminNavBar />
+      {publication?.entity?.founder === identity?.state?.ethereum_address ? <AdminNavBar /> : <ReadNavBar />}
       <PageWrapper>
         <Switch>
           <Route exact path={`${url}`} component={ArticleList} />
-          <Route path={`${url}/:a_slug`} component={ArticleRead} />
+          <Route path={`/read/:publication_slug/on/:article_slug`} component={ArticleRead} />
+          <Route path={`${url}/subscribe`} component={SubscribeForm} />
         </Switch>
       </PageWrapper>
     </>

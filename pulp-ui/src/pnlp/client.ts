@@ -34,9 +34,9 @@ export interface BlockchainService {
 export interface IpfsService {
   writeData(path: string, buffer: Buffer, identity: PrivateKey): Promise<IpnsHash>;
 
-  catIpfsJson<T>(path: string, identity: PrivateKey): Promise<T>;
+  catIpfsJson<T>(path: string, identity?: PrivateKey): Promise<T>;
 
-  resolveIpns(ipns_hash: IpnsHash, identity: PrivateKey): Promise<IpfsHash>;
+  resolveIpns(ipns_hash: IpnsHash): Promise<IpfsHash>;
 
   lsIpns(path: string, identity: PrivateKey): Promise<string[]>;
 }
@@ -77,6 +77,11 @@ export class PnlpClient {
     const ipns_address = await this.ipfs_service.writeData(path, buffer, identity);
     console.debug('ipns_address: ', ipns_address);
 
+    const settings = Buffer.from(JSON.stringify({}, null, 2));
+    const settings_path = `${publication.slug}/${PnlpConstant.SETTINGS_FILENAME}`;
+    const settings_ipns_address = await this.ipfs_service.writeData(settings_path, settings, identity);
+    console.log('settings_ipns_address: ', settings_ipns_address);
+
     const transaction_hash = await this.blockchain_service.createPublication(publication.slug, ipns_address);
 
     // TODO: consider writing some of the metadata back to the PublicationEntity for reverse-lookups?
@@ -89,7 +94,7 @@ export class PnlpClient {
       metadata: {
         tx: transaction_hash,
         ipns: ipns_address,
-        publisher: publication.publisher,
+        founder: publication.founder,
         timestamp: new Date(), // not the true, persisted date
       },
     };
@@ -106,15 +111,15 @@ export class PnlpClient {
     return publication;
   }
 
-  public async loadPublication(publication_slug: string, identity: PrivateKey): Promise<PublicationEntity> {
+  public async loadPublication(publication_slug: string): Promise<PublicationEntity> {
     console.debug(`fetching ${publication_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
 
-    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns, identity);
+    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
 
     const path = `/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`;
-    const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(path, identity);
+    const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(path);
 
     return publication;
   }
@@ -136,7 +141,7 @@ export class PnlpClient {
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
 
-    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns, identity);
+    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
 
     // TODO: decrypt settings with user key
     const path = `/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.SETTINGS_FILENAME}`;
@@ -162,13 +167,13 @@ export class PnlpClient {
     const ipns_address = await this.ipfs_service.writeData(article_path, article_buffer, identity);
     console.debug('ipns_address: ', ipns_address);
 
-    const bucket_address = await this.ipfs_service.resolveIpns(ipns_address, identity);
+    const bucket_address = await this.ipfs_service.resolveIpns(ipns_address);
     const ipfs_address = `${bucket_address}/${article.publication_slug}/${article.slug}`;
 
     const transaction_hash = await this.blockchain_service.publishArticle(article.publication_slug, ipfs_address);
 
     // update publication with new transaction ID and article slug
-    const publication = await this.loadPublication(article.publication_slug, identity);
+    const publication = await this.loadPublication(article.publication_slug);
     publication.articles = publication.articles || {};
     publication.articles[article.slug] = {
       tx: transaction_hash,
@@ -192,16 +197,16 @@ export class PnlpClient {
     };
   }
 
-  public async loadArticle(publication_slug: string, article_slug: string, identity: PrivateKey): Promise<{ publication: PublicationEntity; article: ArticleDto }> {
+  public async loadArticle(publication_slug: string, article_slug: string): Promise<{ publication: PublicationEntity; article: ArticleDto }> {
     console.debug(`fetching article: ${publication_slug}/${article_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
     const ipns_hash = publication_record.ipns;
-    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns, identity);
+    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
 
-    const article = await this.ipfs_service.catIpfsJson<ArticleEntity>(`/ipfs/${ipfs_hash}/${publication_slug}/${article_slug}`, identity);
+    const article = await this.ipfs_service.catIpfsJson<ArticleEntity>(`/ipfs/${ipfs_hash}/${publication_slug}/${article_slug}`);
 
-    const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(`/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`, identity);
+    const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(`/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`);
 
     if (!article) {
       throw new Error(`Article pulp/${publication_slug}/${article_slug} does not exist or is not visible`);

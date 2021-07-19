@@ -1,6 +1,18 @@
 import { createSelector, PayloadAction } from '@reduxjs/toolkit';
 import { pnlp_client } from 'app/pnlp-client';
-import { ArticleDto, ArticleEntity, ArticleMetadata, EnsAlias, PnlpError, PublicationDto, PublicationEntity, PublicationMetadata, PublicationSettingsEntity } from 'pnlp/domain';
+import {
+  ArticleDto,
+  ArticleEntity,
+  ArticleMetadata,
+  ArticleSlug,
+  EnsAlias,
+  friendlyName,
+  PnlpError,
+  PublicationDto,
+  PublicationEntity,
+  PublicationMetadata,
+  PublicationSettingsEntity
+} from 'pnlp/domain';
 import { PnlpIdentity } from 'pnlp/identity';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { RootState } from 'types';
@@ -19,6 +31,8 @@ export interface PublicationState {
 
   awaiting_tx: boolean;
   tx_error?: PnlpError;
+
+  founder_ens_alias?: EnsAlias;
 
   entity: PublicationEntity;
   metadata?: PublicationMetadata;
@@ -41,7 +55,7 @@ export interface ArticleApplicationState {
 }
 
 export interface ArticleState {
-  requested_slug: string;
+  requested_slug?: ArticleSlug;
 
   application: ArticleApplicationState;
 
@@ -54,6 +68,8 @@ export interface ArticleState {
   writing: boolean;
   write_error?: PnlpError;
 
+  author_ens_alias?: EnsAlias;
+
   entity: ArticleEntity;
   metadata?: ArticleMetadata;
 }
@@ -64,7 +80,7 @@ export interface IdentityState {
 
   state?: PnlpIdentity;
 
-  ens_alias?: string;
+  ens_alias?: EnsAlias;
 }
 
 export interface CatalogueState {
@@ -89,7 +105,7 @@ export const initialPublicationState: PublicationState = {
   writing: false,
   entity: {
     slug: '',
-    publisher: '',
+    founder: '',
     articles: {},
     properties: {
       title: '',
@@ -110,8 +126,6 @@ export const initialSettingsState: PublicationSettingsState = {
 };
 
 export const initialArticleState: ArticleState = {
-  requested_slug: '',
-
   application: {
     preview: false,
   },
@@ -220,15 +234,16 @@ const slice = createSlice({
     setArticleMetadata(state, action: PayloadAction<ArticleMetadata>) {
       state.article.metadata = action.payload;
     },
-    loadArticle(state, action: PayloadAction<string>) {
+    loadArticle(state, action: PayloadAction<ArticleSlug>) {
       state.article.requested_slug = action.payload;
       state.article.loading = true;
       state.article.load_error = undefined;
     },
-    loadArticleSuccess(state, action: PayloadAction<ArticleEntity>) {
+    loadArticleSuccess(state, action: PayloadAction<ArticleDto>) {
       state.article.loading = true;
       state.article.load_error = undefined;
-      state.article.entity = action.payload;
+      state.article.entity = action.payload.article;
+      state.article.metadata = action.payload.metadata;
     },
     loadArticleError(state, action: PayloadAction<PnlpError>) {
       state.article.loading = false;
@@ -312,11 +327,6 @@ export const selectSettings = createSelector([selectDomain], adminState => admin
 
 export const selectIdentity = createSelector([selectDomain], adminState => adminState.identity);
 
-export const selectMe = createSelector(
-  [selectDomain],
-  adminState => adminState.identity?.ens_alias || `${adminState.identity?.state?.ethereum_address.slice(0, 4)}..${adminState.identity?.state?.ethereum_address.slice(-3)}`,
-);
-
 export const selectCatalogue = createSelector([selectDomain], adminState => adminState.catalogue);
 
 export const selectNewAccount = createSelector([selectDomain], adminState => !adminState.catalogue?.loading && !adminState.catalogue.entities?.length);
@@ -332,6 +342,14 @@ export const selectIpfsWriting = createSelector([selectDomain], adminState => {
 export const selectAwaitingTransaction = createSelector([selectDomain], adminState => {
   return adminState.publication.awaiting_tx || adminState.article.awaiting_tx;
 });
+
+export const selectUserFriendlyName = createSelector([selectDomain], adminState => friendlyName(adminState?.identity?.state?.ethereum_address, adminState?.identity?.ens_alias));
+
+export const selectAuthorFriendlyName = createSelector([selectDomain], adminState => friendlyName(adminState?.article?.entity?.author, adminState?.article?.author_ens_alias));
+
+export const selectFounderFriendlyName = createSelector([selectDomain], adminState =>
+  friendlyName(adminState?.publication?.entity?.founder, adminState?.publication?.founder_ens_alias),
+);
 
 export const { actions: adminActions, reducer } = slice;
 
@@ -386,11 +404,9 @@ export function* updatePublication() {
 
 export function* loadPublication() {
   const publication: PublicationState = yield select(selectPublication);
-  const identity: IdentityState = yield select(selectIdentity);
-  throwIfUnauthorized(identity?.state);
 
   try {
-    const response: PublicationEntity = yield pnlp_client.loadPublication(publication.requested_slug, identity!.state!.ipns_key);
+    const response: PublicationEntity = yield pnlp_client.loadPublication(publication.requested_slug);
     yield put(adminActions.loadPublicationSuccess(response));
   } catch (err) {
     yield put(adminActions.loadPublicationError({ message: err.message }));
@@ -407,7 +423,7 @@ export function* publishArticle() {
     yield put(adminActions.setArticleMetadata(response.metadata));
     yield pnlp_client.awaitTransaction(response.metadata.tx);
     yield put(adminActions.publishArticleSuccess(response));
-    yield call([history, history.push], `/admin/${publication.entity.slug}/history`);
+    yield call([history, history.push], `/read/${publication.entity.slug}/on/${article.entity.slug}`);
   } catch (err) {
     yield put(adminActions.publishArticleError({ message: err.message }));
   }
@@ -415,15 +431,20 @@ export function* publishArticle() {
 
 export function* loadArticle() {
   const article: ArticleState = yield select(selectArticle);
-  const publication: PublicationState = yield select(selectPublication);
-  const identity: IdentityState = yield select(selectIdentity);
-  throwIfUnauthorized(identity?.state);
+  if (!article.requested_slug) {
+    throw new Error('Cannot load article without article and publication slug');
+  }
 
   try {
-    const response: ArticleDto = yield pnlp_client.loadArticle(publication.entity.slug, article.requested_slug, identity!.state!.ipns_key);
-    yield put(adminActions.publishArticleSuccess(response));
+    const response: { publication: PublicationEntity; article: ArticleDto } = yield pnlp_client.loadArticle(
+      article.requested_slug.publication_slug,
+      article.requested_slug.article_slug,
+    );
+    console.log(response);
+    yield put(adminActions.loadArticleSuccess(response.article));
+    yield put(adminActions.loadPublicationSuccess(response.publication));
   } catch (err) {
-    yield put(adminActions.publishArticleError({ message: err.message }));
+    yield put(adminActions.loadArticleError({ message: err.message }));
   }
 }
 

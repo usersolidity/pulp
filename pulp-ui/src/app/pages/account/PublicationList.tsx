@@ -1,5 +1,5 @@
 import { ExternalLink } from 'app/components/ExternalLink';
-import { selectCatalogue, selectIdentity, selectMe, useAdminSlice } from 'app/pages/admin/admin-redux';
+import { selectCatalogue, selectIdentity, selectUserFriendlyName, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
@@ -16,14 +16,14 @@ export function PublicationList() {
   const { t } = useTranslation();
   const { actions } = useAdminSlice();
   const identity = useSelector(selectIdentity);
-  const me = useSelector(selectMe);
+  const me = useSelector(selectUserFriendlyName);
   const catalogue = useSelector(selectCatalogue);
   const dispatch = useDispatch();
   const history = useHistory();
   let { url } = useRouteMatch();
 
   const onSelect = (slug: string) => {
-    history.push(`/admin/${slug}/write`);
+    history.push(`/read/${slug}`);
   };
 
   return (

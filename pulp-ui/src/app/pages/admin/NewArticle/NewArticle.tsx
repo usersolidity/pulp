@@ -9,8 +9,8 @@ import { useParams, useRouteMatch } from 'react-router-dom';
 export function NewArticle() {
   const { t } = useTranslation();
   let { url } = useRouteMatch();
-  let { p_slug } = useParams<{ p_slug?: string }>();
-  // const showPreview = () => setShowPreview(true)
+  let { publication_slug } = useParams<{ publication_slug?: string }>();
+  // const showPreview = () => setShowPreview(true);
   const { actions } = useAdminSlice();
   const article = useSelector(selectArticle);
   const publication = useSelector(selectPublication);

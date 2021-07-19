@@ -1,10 +1,9 @@
-import MDEditor from '@uiw/react-md-editor';
 import { selectArticle, selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams, useRouteMatch } from 'react-router-dom';
 
-export function ArticleRead() {
+export function SubscribeForm() {
   const article = useSelector(selectArticle);
   let { url } = useRouteMatch();
   let { article_slug, publication_slug } = useParams<{ article_slug?: string; publication_slug?: string }>();
@@ -21,9 +20,6 @@ export function ArticleRead() {
 
   // TODO:NEXT: this doesn't get called every time so we don't reload publication on route change
   useEffectOnMount(() => {
-    console.log('loading...');
-    console.log(article_slug);
-    console.log(publication_slug);
     if (article_slug && publication_slug) {
       dispatch(actions.loadArticle({ article_slug, publication_slug }));
     }
@@ -31,14 +27,7 @@ export function ArticleRead() {
 
   return (
     <>
-      <div className="mt-4">
-        <div className="text-muted small">
-          /pnlp/read/{publication?.entity?.slug}/on/{article?.entity?.slug}
-        </div>
-        <div className="lead mt-2">{article?.entity?.title}</div>
-        <div className="text-muted mb-3">{article?.entity?.subtitle}</div>
-        <MDEditor.Markdown source={article?.entity?.content} />
-      </div>
+      <div className="mt-4">TODO: Subscribe Form</div>
     </>
   );
 }

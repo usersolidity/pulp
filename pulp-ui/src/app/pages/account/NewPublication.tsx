@@ -1,4 +1,4 @@
-import { selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
+import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import { PublicationPropertiesEntity } from 'pnlp/domain';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
@@ -19,6 +19,7 @@ export function NewPublication() {
 
   const { actions } = useAdminSlice();
   const publication = useSelector(selectPublication);
+  const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();
 
   const onChangePublicationProperties = (value: Partial<PublicationPropertiesEntity>) => {
@@ -44,6 +45,14 @@ export function NewPublication() {
     if (evt !== undefined && evt.preventDefault) {
       evt.preventDefault();
     }
+    if (!identity.state?.ethereum_address) {
+      throw new Error('Cannot create publication without key provider.');
+    }
+    const updated_publication = {
+      ...publication.entity,
+      founder: identity.state?.ethereum_address,
+    };
+    dispatch(actions.setPublication(updated_publication));
     dispatch(actions.createPublication());
     history.push(`/account/publishing`);
   };

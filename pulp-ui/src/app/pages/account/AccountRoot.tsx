@@ -13,7 +13,7 @@ import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-route
 
 export function AccountRoot() {
   let { url } = useRouteMatch();
-  let { p_slug } = useParams<{ p_slug?: string }>();
+  let { publication_slug } = useParams<{ publication_slug?: string }>();
   const { actions } = useAdminSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);

@@ -2,8 +2,43 @@
 
 The reference implementation of a Publisher.
 
+# Development
+
+_Instructions for contributing to this repository_
+
+- clone this repo
+- cd `pnlp/pnlp-app`
+- `npm install`
+- `npm start`
+- Visit [http://localhost:4200](http://localhost:4200)
+
+By default, the local app will connect to our ropsten network contract (specified in `environment.ts`). If you would like to instead connect to a local testnet, use the following steps in a new shell session
+
+- `npm install -g ganache-cli`
+- `npm install -g truffle`
+- Run `ganache-cli` (Note at least one Private Key from the logs for steps below)
+- Run `cd pnlp-contract && truffle build && truffle migrate`
+- `cp pnlp-contract/build/pnlp.json pulp-ui/src/pnlp/io/pnlp.json`
+- Copy the deployed contract address into `metamask-client.ts`
+- bounce `npm start` after this is complete
+
+If you restart your local chain, don't forget to repeat the above.
+
+To Test:
+
+- Add Metamask Chrome App if you don't already have it
+- Set Metamask blockchain to `localhost:8545`
+- Import Private Key from ganache to Metamask
 
 # TODO
+
+###### Factor out url constants
+- /read, /on, subscribe ...
+- /account, /admin, /auth, ...
+
+###### Public Publication Homepage
+- Publication Title, Tagline, Author, article list w/ links
+- this page and read page should have admin toolbar at the top when the admin === publisher
 
 ###### Factor out etherscan address into environment variable
 
@@ -52,3 +87,9 @@ The reference implementation of a Publisher.
 - search for BsQuestionCircle and create doc to reflect each one
 
 ###### rename admin-redux and move out of admin directory
+- potentially split into publication, article, ... or not necessary
+
+###### Run ipfs node
+- eventually we're probably going to want a pulp-server to run an ipfs-node, use https://www.npmjs.com/package/ipfs-http-client to interop with ipfs, libp2p keys, and IPNS
+
+###### add redirect url to Sign In

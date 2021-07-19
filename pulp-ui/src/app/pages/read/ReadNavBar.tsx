@@ -1,12 +1,20 @@
 import { PageWrapper } from 'app/components/PageWrapper';
-import { selectPublication } from 'app/pages/admin/admin-redux';
+import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
-import { useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { LinkContainer } from 'react-router-bootstrap';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
 
-export function AdminNavBar() {
+export function ReadNavBar() {
+  let { url } = useRouteMatch();
+  let { publication_slug } = useParams<{ publication_slug?: string }>();
+  const { actions } = useAdminSlice();
   const publication = useSelector(selectPublication);
+  const identity = useSelector(selectIdentity);
+  const dispatch = useDispatch();
 
   return (
     <Wrapper>
@@ -14,6 +22,15 @@ export function AdminNavBar() {
         <TitleWrapper>
           <Title href="/">{publication?.entity?.properties?.title}</Title>
         </TitleWrapper>
+        <NavWrapper>
+          <Item>
+            <LinkContainer to={`/read/${publication?.entity?.slug}/subscribe`}>
+              <Button size="sm" variant="primary">
+                Subscribe
+              </Button>
+            </LinkContainer>{' '}
+          </Item>
+        </NavWrapper>
       </PageWrapper>
     </Wrapper>
   );
@@ -47,7 +64,7 @@ const TitleWrapper = styled.div`
 `;
 
 const Title = styled.a`
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   color: ${p => p.theme.primary};
   font-weight: bold;
   margin-right: 1rem;

@@ -10,7 +10,7 @@ import { useParams, useRouteMatch } from 'react-router-dom';
 
 export function ArticlePreview() {
   let { url } = useRouteMatch();
-  let { p_slug } = useParams<{ p_slug?: string }>();
+  let { publication_slug } = useParams<{ publication_slug?: string }>();
   // const showPreview = () => setShowPreview(true)
   const { actions } = useAdminSlice();
   const article = useSelector(selectArticle);

@@ -44,6 +44,7 @@
     "i18next-scanner": "2.11.0",
     "inquirer": "7.3.3",
     "inquirer-directory": "2.2.0",
+    "ipfs-http-client": "50.1.2",
     "jest-styled-components": "7.0.3",
     "libp2p-crypto": "^0.17.7",
     "lint-staged": "10.3.0",
