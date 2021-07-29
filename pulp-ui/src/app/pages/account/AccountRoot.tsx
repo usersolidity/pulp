@@ -7,7 +7,6 @@ import { AwaitingPublication } from 'app/pages/account/AwaitingPublication';
 import { NewPublication } from 'app/pages/account/NewPublication';
 import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-router-dom';
 
@@ -36,10 +35,6 @@ export function AccountRoot() {
 
   return (
     <>
-      <Helmet>
-        <title>Account</title>
-        <meta name="description" content="Pulp Account" />
-      </Helmet>
       <NavBar />
       <PageWrapper>
         <Switch>

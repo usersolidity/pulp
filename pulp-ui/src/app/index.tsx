@@ -24,7 +24,7 @@ export function App() {
   const { i18n } = useTranslation();
   return (
     <Router history={history}>
-      <Helmet titleTemplate="%s - Pulp" defaultTitle="Publish on Web 3" htmlAttributes={{ lang: i18n.language }}>
+      <Helmet titleTemplate="Pulp" defaultTitle="Publish on Web 3" htmlAttributes={{ lang: i18n.language }}>
         <meta name="description" content="Pulp: Publish on Web 3" />
       </Helmet>
 

@@ -9,7 +9,6 @@ import { SubTitle } from 'app/components/SubTitle';
 import { Title } from 'app/components/Title';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
-import { Helmet } from 'react-helmet-async';
 import { LinkContainer } from 'react-router-bootstrap';
 import styled from 'styled-components/macro';
 import { ReactComponent as CSSIcon } from './assets/cra-logo.svg';
@@ -17,10 +16,6 @@ import { ReactComponent as CSSIcon } from './assets/cra-logo.svg';
 export function AboutPage() {
   return (
     <>
-      <Helmet>
-        <title>About</title>
-        <meta name="description" content="Information about Pulp" />
-      </Helmet>
       <NavBar />
       <PageWrapper>
         <Wrapper>
@@ -111,7 +106,7 @@ export function AboutPage() {
               <Subscribe />
             </Content>
           </Feature>
-          <Lead className="mt-4 text-center">So Get Started!</Lead>
+          <Lead className="mt-4 text-center">Now Get Started!</Lead>
           <div className="text-center">
             <LinkContainer to="/auth/login" className="mb-5">
               <Button size="lg" variant="outline-secondary">

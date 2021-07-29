@@ -5,7 +5,6 @@ import { AdminNavBar } from 'app/pages/admin/AdminNavBar';
 import { HistoryRoot } from 'app/pages/admin/history/HistoryRoot';
 import { NewArticle } from 'app/pages/admin/NewArticle/Loadable';
 import * as React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-router-dom';
 
@@ -38,10 +37,6 @@ export function AdminRoot() {
 
   return (
     <>
-      <Helmet>
-        <title>Sign In</title>
-        <meta name="description" content="Sign in to use Pulp" />
-      </Helmet>
       <AdminNavBar />
       <PageWrapper>
         <Switch>
