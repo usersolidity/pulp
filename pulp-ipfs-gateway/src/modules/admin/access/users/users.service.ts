@@ -1,28 +1,22 @@
+import { PaginationResponseDto } from '@common/dtos';
+import { DBErrorCode } from '@common/enums';
 import {
-    InternalServerErrorException,
-    RequestTimeoutException,
-    NotFoundException,
-    Injectable,
-} from '@nestjs/common';
-import {
-    ChangePasswordRequestDto,
-    CreateUserRequestDto,
-    UpdateUserRequestDto,
-    UserResponseDto,
-} from './dtos';
-import {
-    InvalidCurrentPasswordException,
-    ForeignKeyConflictException,
-    UserExistsException,
+    ForeignKeyConflictException, UserExistsException
 } from '@common/exeptions';
 import { PaginationRequest } from '@common/interfaces';
-import { PaginationResponseDto } from '@common/dtos';
-import { UsersRepository } from './users.repository';
-import { InjectRepository } from '@nestjs/typeorm';
 import { HashHelper, Pagination } from '@helpers';
-import { DBErrorCode } from '@common/enums';
-import { UserMapper } from './users.mapper';
+import {
+    Injectable, InternalServerErrorException, NotFoundException, RequestTimeoutException
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { TimeoutError } from 'rxjs';
+import {
+    CreateUserRequestDto,
+    UpdateUserRequestDto,
+    UserResponseDto
+} from './dtos';
+import { UserMapper } from './users.mapper';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
@@ -90,13 +84,13 @@ export class UsersService {
     public async createUser(userDto: CreateUserRequestDto): Promise<UserResponseDto> {
         try {
             let userEntity = UserMapper.toCreateEntity(userDto);
-            userEntity.password = await HashHelper.encrypt(userEntity.password);
+            userEntity.nonce = await HashHelper.encrypt(userEntity.nonce); // TODO: create nonce
             userEntity = await this.usersRepository.save(userEntity);
             return UserMapper.toDto(userEntity);
         } catch (error) {
 
             if (error.code == DBErrorCode.PgUniqueConstraintViolation) {
-                throw new UserExistsException(userDto.username);
+                throw new UserExistsException(userDto.address);
             }
             if (
                 error.code == DBErrorCode.PgForeignKeyConstraintViolation
@@ -131,7 +125,7 @@ export class UsersService {
             return UserMapper.toDto(userEntity);
         } catch (error) {
             if (error.code == DBErrorCode.PgUniqueConstraintViolation) {
-                throw new UserExistsException(userDto.username);
+                throw new UserExistsException(userDto.address);
             }
             if (
                 error.code == DBErrorCode.PgForeignKeyConstraintViolation
@@ -147,38 +141,39 @@ export class UsersService {
         }
     }
 
-    /**
-     * Change user password
-     * @param changePassword {ChangePasswordRequestDto}
-     * @param user {string}
-     * @returns {Promise<UserResponseDto>}
-     */
-    public async changePassword(changePassword: ChangePasswordRequestDto, userId: string): Promise<UserResponseDto> {
+    // TODO: remove this, it's unneeded
+    // /**
+    //  * Change user password
+    //  * @param changePassword {ChangePasswordRequestDto}
+    //  * @param user {string}
+    //  * @returns {Promise<UserResponseDto>}
+    //  */
+    // public async changePassword(changePassword: ChangePasswordRequestDto, userId: string): Promise<UserResponseDto> {
 
-        const { currentPassword, newPassword } = changePassword;
+    //     const { currentPassword, newPassword } = changePassword;
 
-        const userEntity = await this.usersRepository.findOne({ id: userId });
+    //     const userEntity = await this.usersRepository.findOne({ id: userId });
 
-        if (!userEntity) {
-            throw new NotFoundException();
-        }
+    //     if (!userEntity) {
+    //         throw new NotFoundException();
+    //     }
 
-        const passwordMatch = await HashHelper.compare(currentPassword, userEntity.password);
+    //     const passwordMatch = await HashHelper.compare(currentPassword, userEntity.password);
 
-        if (!passwordMatch) {
-            throw new InvalidCurrentPasswordException();
-        }
+    //     if (!passwordMatch) {
+    //         throw new InvalidSignatureException();
+    //     }
 
-        try {
-            userEntity.password = await HashHelper.encrypt(newPassword);
-            await this.usersRepository.save(userEntity);
-            return UserMapper.toDto(userEntity);
-        } catch (error) {
-            if (error instanceof TimeoutError) {
-                throw new RequestTimeoutException();
-            } else {
-                throw new InternalServerErrorException();
-            }
-        }
-    }
+    //     try {
+    //         userEntity.password = await HashHelper.encrypt(newPassword);
+    //         await this.usersRepository.save(userEntity);
+    //         return UserMapper.toDto(userEntity);
+    //     } catch (error) {
+    //         if (error instanceof TimeoutError) {
+    //             throw new RequestTimeoutException();
+    //         } else {
+    //             throw new InternalServerErrorException();
+    //         }
+    //     }
+    // }
 }

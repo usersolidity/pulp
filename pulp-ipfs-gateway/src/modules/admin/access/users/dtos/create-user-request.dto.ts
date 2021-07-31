@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
     ArrayNotEmpty,
     IsAlphanumeric,
@@ -5,10 +6,8 @@ import {
     IsInt,
     IsNotEmpty,
     Length,
-    Matches,
-    MaxLength
+    Matches
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 
 const passwordRegex = /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
 export class CreateUserRequestDto {
@@ -16,32 +15,18 @@ export class CreateUserRequestDto {
     @IsNotEmpty()
     @IsAlphanumeric()
     @ApiProperty({
-        example: 'jdoe',
+        example: '0x5d20caFc82feDE339aCFF0d3097b07B3E3E940b5',
     })
-    username: string;
+    address: string;
 
-    @IsNotEmpty()
-    @MaxLength(100)
-    @ApiProperty({
-        example: 'John',
-    })
-    firstName: string;
-
-    @IsNotEmpty()
-    @MaxLength(100)
-    @ApiProperty({
-        example: 'Doe',
-    })
-    lastName: string;
-
-    @Matches(passwordRegex, { message: 'Password too weak' })
+    @Matches(passwordRegex, { message: 'Nonce too weak' })
     @IsNotEmpty()
     @IsAlphanumeric()
     @Length(6, 20)
     @ApiProperty({
         example: 'Hello123',
     })
-    password: string;
+    nonce: string;
 
     @ApiProperty({ example: [1, 2] })
     @ArrayNotEmpty()

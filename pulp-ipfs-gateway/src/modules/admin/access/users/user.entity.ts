@@ -1,5 +1,5 @@
-import { Entity, Column, ManyToMany, JoinTable, PrimaryColumn } from 'typeorm';
 import { BaseEntity } from '@database/entities';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 import { PermissionEntity } from '../permissions/permission.entity';
 import { RoleEntity } from '../roles/role.entity';
 import { UserStatus } from './user-status.enum';
@@ -10,34 +10,18 @@ export class UserEntity extends BaseEntity {
   id?: string;
 
   @Column({
-    name: 'username',
+    name: 'address',
     type: 'varchar',
     unique: true,
   })
-  username: string;
+  address: string;
 
   @Column({
-    name: 'first_name',
-    type: 'varchar',
-    length: 100,
-    nullable: false,
-  })
-  firstName: string;
-
-  @Column({
-    name: 'last_name',
-    type: 'varchar',
-    length: 100,
-    nullable: false,
-  })
-  lastName: string;
-
-  @Column({
-    name: 'password',
+    name: 'nonce',
     type: 'varchar',
     nullable: false,
   })
-  password: string;
+  nonce: string;
 
   @Column({
     name: 'is_super_user',

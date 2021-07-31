@@ -4,7 +4,7 @@ import { ForeignKeyConflictException } from './foreign-key-conflict.exception';
 import { HttpErrorType } from './http-error-type';
 import { HttpExceptionFilter } from './http-exception.filter';
 import { InvalidCredentialsException } from './invalid-credentials.exception';
-import { InvalidCurrentPasswordException } from './invalid-current-password.exception';
+import { InvalidSignatureException } from './invalid-signature.exception';
 import { InvalidTokenException } from './invalid-token.exception';
 import { PermissionExistsException } from './permission-exists.exception';
 import { RefreshTokenExpiredException } from './refresh-token-expired.exception';
@@ -17,11 +17,11 @@ export {
     HttpExceptionFilter,
     RoleExistsException,
     UserExistsException,
-    InvalidCurrentPasswordException,
+    InvalidSignatureException,
     InvalidCredentialsException,
     DisabledUserException,
     InvalidTokenException,
     AccessTokenExpiredException,
     RefreshTokenExpiredException,
     HttpErrorType
-}
+};

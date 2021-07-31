@@ -24,9 +24,7 @@ export class UsersRepository extends Repository<UserEntity> {
 
         if (search) {
             query.where(`
-            u.username ILIKE :search
-            OR u.first_name ILIKE :search
-            OR u.last_name ILIKE :search
+            u.address ILIKE :search
             `, { search: `%${search}%` }
             );
         }
@@ -35,16 +33,16 @@ export class UsersRepository extends Repository<UserEntity> {
     }
 
     /**
-     * find user by username
-     * @param username {string}
+     * find user by address
+     * @param address {string}
      * @returns Promise<string>
      */
-    async findUserByUsername(username: string): Promise<UserEntity> {
+    async findUserByAddress(address: string): Promise<UserEntity> {
         return await this.createQueryBuilder('u')
             .leftJoinAndSelect('u.roles', 'r', 'r.active = true')
             .leftJoinAndSelect('r.permissions', 'rp', 'rp.active = true')
             .leftJoinAndSelect('u.permissions', 'p', 'p.active = true')
-            .where('u.username = :username', { username })
+            .where('u.address = :address', { address })
             .getOne();
     }
 }

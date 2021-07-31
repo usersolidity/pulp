@@ -1,21 +1,19 @@
+import { UserStatus } from '@admin/access/users/user-status.enum';
+import {
+    AccessTokenExpiredException,
+    InvalidTokenException, RefreshTokenExpiredException
+} from '@common/exeptions';
 import { UsersRepository } from '@modules/admin/access/users/users.repository';
 import {
     Injectable,
-    Logger,
+    Logger
 } from '@nestjs/common';
-import { UserStatus } from '@admin/access/users/user-status.enum';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
-    RefreshTokenExpiredException,
-    AccessTokenExpiredException,
-    InvalidTokenException,
-} from '@common/exeptions';
-import {
-    ValidateTokenResponseDto,
     JwtPayload,
-    TokenDto,
+    TokenDto, ValidateTokenResponseDto
 } from '../dtos';
 import {
     TokenError,
@@ -26,8 +24,8 @@ import {
 export class TokenService {
 
     constructor(
-        @InjectRepository(UsersRepository) 
-        private usersRepository:UsersRepository,
+        @InjectRepository(UsersRepository)
+        private usersRepository: UsersRepository,
         private jwtService: JwtService,
         private configService: ConfigService,
     ) { }
@@ -59,8 +57,8 @@ export class TokenService {
     * @returns  Returns access and refresh tokens with expiry or error
     */
     public generateRefreshToken(refreshToken: string): TokenDto {
-        const { id, username } = this.verifyToken(refreshToken, TokenType.RefreshToken);
-        return this.generateAuthToken({ id, username });
+        const { id, address } = this.verifyToken(refreshToken, TokenType.RefreshToken);
+        return this.generateAuthToken({ id, address });
     }
 
     /**
@@ -86,7 +84,7 @@ export class TokenService {
     /**
      * Validate received JWT
      * @param token {string}
-     * @returns valid: boolean 
+     * @returns valid: boolean
      */
     public async validateToken(token: string): Promise<ValidateTokenResponseDto> {
         try {

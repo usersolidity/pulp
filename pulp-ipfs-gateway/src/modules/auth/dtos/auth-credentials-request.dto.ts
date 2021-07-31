@@ -5,13 +5,13 @@ export class AuthCredentialsRequestDto {
 
   @IsNotEmpty()
   @ApiProperty({
-    example: 'jDoe',
+    example: '0x5d20caFc82feDE339aCFF0d3097b07B3E3E940b5',
   })
-  readonly username: string;
+  readonly address: string;
 
   @IsNotEmpty()
   @ApiProperty({
-    example: 'Hello123',
+    example: 'signed nonce',
   })
-  readonly password: string;
+  readonly signature: string;
 }

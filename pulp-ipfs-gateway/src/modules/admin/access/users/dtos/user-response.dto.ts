@@ -8,13 +8,10 @@ export class UserResponseDto {
   id: string;
 
   @ApiProperty()
-  username: string;
+  address: string;
 
   @ApiProperty()
-  firstName: string;
-
-  @ApiProperty()
-  lastName: string;
+  nonce: string;
 
   @ApiProperty({ type: [RoleResponseDto] })
   roles?: RoleResponseDto[];

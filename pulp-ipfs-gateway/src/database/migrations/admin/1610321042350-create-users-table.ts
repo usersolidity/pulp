@@ -18,26 +18,14 @@ export class createUsersTable1610321042350 implements MigrationInterface {
                         isNullable: false,
                     },
                     {
-                        name: 'username',
+                        name: 'address', // ethereum public address
                         type: 'varchar',
                         length: '20',
                         isUnique: true,
                         isNullable: false,
                     },
                     {
-                        name: 'first_name',
-                        type: 'varchar',
-                        length: '100',
-                        isNullable: false,
-                    },
-                    {
-                        name: 'last_name',
-                        type: 'varchar',
-                        length: '100',
-                        isNullable: false,
-                    },
-                    {
-                        name: 'password',
+                        name: 'nonce',
                         type: 'varchar',
                         isNullable: false,
                     },

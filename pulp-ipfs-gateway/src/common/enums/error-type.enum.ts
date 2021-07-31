@@ -5,7 +5,7 @@ export enum ErrorType {
     PermissionExists = 'PERMISSION_EXISTS',
     RoleExists = 'ROLE_EXISTS',
     UserExists = 'USER_EXISTS',
-    InvalidCurrentPassword = 'INVALID_CURRENT_PASSWORD',
+    InvalidSignature = 'INVALID_SIGNATURE',
     InvalidCredentials = 'INVALID_CREDENTIALS',
     BlockedUser = 'BLOCKED_USER',
     InactiveUser = 'INACTIVE_USER',

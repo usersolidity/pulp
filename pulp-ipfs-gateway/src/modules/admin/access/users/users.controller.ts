@@ -1,43 +1,27 @@
 import {
-    ValidationPipe,
-    ParseUUIDPipe,
-    Controller,
-    UseGuards,
-    Param,
-    Post,
-    Body,
-    Get,
-    Put,
-} from '@nestjs/common';
-import {
-    ApiConflictResponse,
-    ApiBearerAuth,
-    ApiOperation,
-    ApiQuery,
-    ApiTags,
-} from '@nestjs/swagger';
-import {
-    PermissionsGuard,
-    JwtAuthGuard,
-    CurrentUser,
-    Permissions,
-    TOKEN_NAME,
+    JwtAuthGuard, Permissions, PermissionsGuard, TOKEN_NAME
 } from '@auth';
-import {
-    ChangePasswordRequestDto,
-    CreateUserRequestDto,
-    UpdateUserRequestDto,
-    UserResponseDto,
-} from './dtos';
 import {
     ApiGlobalResponse,
     ApiPaginatedResponse,
     PaginationParams
 } from '@common/decorators';
-import { PaginationRequest } from '@common/interfaces';
 import { PaginationResponseDto } from '@common/dtos';
+import { PaginationRequest } from '@common/interfaces';
+import {
+    Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, UseGuards, ValidationPipe
+} from '@nestjs/common';
+import {
+    ApiBearerAuth, ApiConflictResponse, ApiOperation,
+    ApiQuery,
+    ApiTags
+} from '@nestjs/swagger';
+import {
+    CreateUserRequestDto,
+    UpdateUserRequestDto,
+    UserResponseDto
+} from './dtos';
 import { UsersService } from './users.service';
-import { UserEntity } from './user.entity';
 
 @ApiTags('Users')
 @ApiBearerAuth(TOKEN_NAME)
@@ -98,13 +82,13 @@ export class UsersController {
         return this.usersService.updateUser(id, UserDto)
     };
 
-    @ApiOperation({ description: 'Change user password' })
-    @ApiGlobalResponse(UserResponseDto)
-    @Post('/change/password')
-    changePassword(
-        @Body(ValidationPipe) changePassword: ChangePasswordRequestDto,
-        @CurrentUser() user: UserEntity,
-    ): Promise<UserResponseDto> {
-        return this.usersService.changePassword(changePassword, user.id);
-    }
+    // @ApiOperation({ description: 'Change user password' })
+    // @ApiGlobalResponse(UserResponseDto)
+    // @Post('/change/password')
+    // changePassword(
+    //     @Body(ValidationPipe) changePassword: ChangePasswordRequestDto,
+    //     @CurrentUser() user: UserEntity,
+    // ): Promise<UserResponseDto> {
+    //     return this.usersService.changePassword(changePassword, user.id);
+    // }
 }

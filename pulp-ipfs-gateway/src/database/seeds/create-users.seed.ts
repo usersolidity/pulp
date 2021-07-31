@@ -1,23 +1,24 @@
-import { Factory, Seeder } from 'typeorm-seeding';
-import { Connection, In } from 'typeorm';
 import * as _ from 'lodash';
+import { Connection, In } from 'typeorm';
+import { Factory, Seeder } from 'typeorm-seeding';
+import { HashHelper } from '../../helpers';
+import { PermissionEntity } from '../../modules/admin/access/permissions/permission.entity';
+import { RoleEntity } from '../../modules/admin/access/roles/role.entity';
 import { UserStatus } from '../../modules/admin/access/users/user-status.enum';
 import { UserEntity } from '../../modules/admin/access/users/user.entity';
-import { RoleEntity } from '../../modules/admin/access/roles/role.entity';
-import { PermissionEntity } from '../../modules/admin/access/permissions/permission.entity';
-import { HashHelper } from '../../helpers';
 
 const users = [
     {
-        firstName: 'Admin',
-        lastName: 'Admin',
-        password: 'Hello123',
-        username: 'Admin',
-        isSuperUser: true,
+        nonce: '12345',
+        address: '0x5d20caFc82feDE339aCFF0d3097b07B3E3E940b5',
+        isSuperUser: false,
         status: UserStatus.Active
     },
 ];
 const rolePermissions = {
+    'Author': [
+        { slug: 'user.access.ipfs.proxy', description: 'Allow proxy-pass of IPFS data' },
+    ],
     'Developer': [
         { slug: 'admin.access.users.read', description: 'Read users' },
         { slug: 'admin.access.users.create', description: 'Create users' },
@@ -72,8 +73,8 @@ export default class CreateUsersSeed implements Seeder {
         //Creating users
         const entities = await Promise.all(users.map(async u => {
             const roles = Promise.resolve(savedRoles);
-            const password = await HashHelper.encrypt(u.password);
-            const user = new UserEntity({ ...u, password, roles });
+            const nonce = await HashHelper.encrypt(u.nonce); // TODO: generate nonce
+            const user = new UserEntity({ ...u, nonce, roles });
             return user;
         }));
         await connection.manager.save(entities);

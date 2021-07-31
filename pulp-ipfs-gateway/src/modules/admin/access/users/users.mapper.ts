@@ -3,9 +3,7 @@ import { PermissionMapper } from '../permissions/permission.mapper';
 import { RoleEntity } from '../roles/role.entity';
 import { RoleMapper } from '../roles/role.mapper';
 import {
-  CreateUserRequestDto,
-  UserResponseDto,
-  UpdateUserRequestDto
+  CreateUserRequestDto, UpdateUserRequestDto, UserResponseDto
 } from './dtos';
 import { UserStatus } from './user-status.enum';
 import { UserEntity } from './user.entity';
@@ -15,9 +13,8 @@ export class UserMapper {
     const dto = new UserResponseDto();
 
     dto.id = entity.id;
-    dto.username = entity.username;
-    dto.firstName = entity.firstName;
-    dto.lastName = entity.lastName;
+    dto.address = entity.address;
+    dto.nonce = entity.nonce;
     dto.status = entity.status;
     dto.isSuperUser = entity.isSuperUser;
     return dto;
@@ -27,9 +24,8 @@ export class UserMapper {
     const dto = new UserResponseDto();
 
     dto.id = entity.id;
-    dto.username = entity.username;
-    dto.firstName = entity.firstName;
-    dto.lastName = entity.lastName;
+    dto.address = entity.address;
+    dto.nonce = entity.nonce;
     dto.permissions = await Promise.all((await entity.permissions).map(PermissionMapper.toDto));
     dto.roles = await Promise.all((await entity.roles).map(RoleMapper.toDtoWithRelations));
     dto.isSuperUser = entity.isSuperUser;
@@ -39,10 +35,8 @@ export class UserMapper {
 
   public static toCreateEntity(dto: CreateUserRequestDto): UserEntity {
     const entity = new UserEntity();
-    entity.username = dto.username;
-    entity.firstName = dto.firstName;
-    entity.lastName = dto.lastName;
-    entity.password = dto.password;
+    entity.address = dto.address;
+    entity.nonce = dto.nonce;
     entity.permissions = Promise.resolve(dto.permissions.map(id => new PermissionEntity({ id })));
     entity.roles = Promise.resolve(dto.roles.map(id => new RoleEntity({ id })));
     entity.status = UserStatus.Active;
@@ -54,9 +48,8 @@ export class UserMapper {
     entity: UserEntity,
     dto: UpdateUserRequestDto
   ): UserEntity {
-    entity.username = dto.username;
-    entity.firstName = dto.firstName;
-    entity.lastName = dto.lastName;
+    entity.address = dto.address;
+    entity.nonce = dto.nonce;
     entity.permissions = Promise.resolve(dto.permissions.map(id => new PermissionEntity({ id })));
     entity.roles = Promise.resolve(dto.roles.map(id => new RoleEntity({ id })));
     entity.status = dto.status;

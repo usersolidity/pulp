@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
     ArrayNotEmpty,
     IsAlphanumeric,
@@ -7,7 +8,6 @@ import {
     IsNotEmpty,
     MaxLength
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 import { UserStatus } from '../user-status.enum';
 
 export class UpdateUserRequestDto {
@@ -17,29 +17,22 @@ export class UpdateUserRequestDto {
     @ApiProperty({
         example: 'jdoe'
     })
-    username: string;
-
-    @IsNotEmpty()
-    @MaxLength(100)
-    @ApiProperty({
-        example: 'John',
-    })
-    firstName: string;
+    address: string;
 
     @IsNotEmpty()
     @MaxLength(100)
     @ApiProperty({
         example: 'Doe',
     })
-    lastName: string;
+    nonce: string;
 
-    @ApiProperty({example:[1,2]})
+    @ApiProperty({ example: [1, 2] })
     @ArrayNotEmpty()
     @IsArray()
     @IsInt({ each: true })
     permissions: number[];
 
-    @ApiProperty({example:[1,2]})
+    @ApiProperty({ example: [1, 2] })
     @ArrayNotEmpty()
     @IsArray()
     @IsInt({ each: true })
