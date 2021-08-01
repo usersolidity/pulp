@@ -1,7 +1,10 @@
+import { Web3Provider } from '@ethersproject/providers';
 import { Widget } from '@typeform/embed-react';
 import '@typeform/embed/build/css/widget.css';
+import { getWeb3ReactContext, useWeb3React } from '@web3-react/core';
 import { Link } from 'app/components/Link';
 import { selectIdentity, useAdminSlice } from 'app/pages/admin/admin-redux';
+import axios from 'axios';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -22,21 +25,41 @@ export function LoginPage() {
   const dispatch = useDispatch();
   const history = useHistory();
   let { url } = useRouteMatch();
+  const web3 = useWeb3React<Web3Provider>();
+
+  const web3ReactContext = getWeb3ReactContext();
 
   const onLoginMetamask = () => {
     dispatch(actions.loadIdentity());
     // TODO:NEXT: redirect to landing page that lists publications (if more than one) and that auto-redirects to the one publication's admin page if there is only one.
   };
 
+  const onLoginPulp = async () => {
+    console.log(web3);
+    console.log(web3ReactContext);
+    const signer = web3.library?.getSigner();
+    const signed_message = await signer?.signMessage(`pulp ipfs storage nonce: 10`);
+
+    await axios.post(`http://localhost:8080/api/v1/auth/login`, {
+      address: web3.account,
+      signed_message,
+    });
+  };
+
   return (
     <>
       <Container>
         <Row>
+          <Button block size="lg" variant="light" onClick={onLoginPulp}>
+            Log In
+          </Button>
+        </Row>
+        <Row hidden>
           <Col>
             <Widget id="XLkNLWgO" style={{ width: '100%', height: '600px' }} className="my-form" tooltip="Hi there! Pulp is in alpha." buttonColor="#007bff" />
           </Col>
         </Row>
-        <Row className="my-5" hidden>
+        <Row className="my-5">
           <Col></Col>
           <Col xs={12} md={6}>
             <Card className="text-center">

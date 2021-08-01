@@ -1,27 +1,16 @@
 import {
-    ValidationPipe,
-    Controller,
-    Post,
-    Body,
+    Body, Controller, Get, Param, Post, ValidationPipe
 } from '@nestjs/common';
 import {
-    ApiInternalServerErrorResponse,
-    ApiUnauthorizedResponse,
-    ApiOkResponse,
+    ApiInternalServerErrorResponse, ApiOkResponse,
     ApiOperation,
-    ApiTags
+    ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
-    AuthCredentialsRequestDto,
-    ValidateTokenResponseDto,
-    ValidateTokenRequestDto,
-    RefreshTokenRequestDto,
-    LoginResponseDto,
-    TokenDto
+    AuthCredentialsRequestDto, LoginResponseDto, RefreshTokenRequestDto, TokenDto, ValidateTokenRequestDto, ValidateTokenResponseDto
 } from './dtos';
 import {
-    TokenService,
-    AuthService
+    AuthService, TokenService
 } from './services';
 
 @ApiTags('Auth')
@@ -31,6 +20,15 @@ export class AuthController {
         private authService: AuthService,
         private tokenService: TokenService
     ) { }
+
+    @ApiOperation({ description: 'Get address nonce' })
+    @ApiOkResponse({ description: 'Successfully returned nonce' })
+    @ApiInternalServerErrorResponse({ description: 'Server error' })
+    @Get('/:address/nonce')
+    async nonce(@Param('address') address: string): Promise<{ nonce: string; address: string; }> {
+        const nonce = await this.authService.nonce(address);
+        return { nonce, address };
+    }
 
     @ApiOperation({ description: 'User authentication' })
     @ApiOkResponse({ description: 'Successfully authenticated user' })

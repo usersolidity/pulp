@@ -29,7 +29,6 @@
     "@types/webpack-env": "1.15.2",
     "@uiw/react-md-editor": "3.4.6",
     "@web3-react/core": "6.1.9",
-    "@web3-react/injected-connector": "6.0.7",
     "axios": "0.21.1",
     "bootstrap": "4.6.0",
     "chalk": "4.1.0",

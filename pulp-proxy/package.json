@@ -1,0 +1,21 @@
+{
+  "name": "pulp-proxy",
+  "version": "1.0.0",
+  "description": "Authenticates with pulp-auth and forwards to selected ifps-gateway",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:dev": "nodemon src/index.js"
+  },
+  "author": "0xd18b",
+  "license": "MIT",
+  "dependencies": {
+    "confit": "^3.0.0",
+    "http-proxy": "^1.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "jwks-rsa": "^2.0.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}

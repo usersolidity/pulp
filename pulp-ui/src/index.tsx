@@ -5,28 +5,22 @@
  * code.
  */
 
+import { Web3Provider } from '@ethersproject/providers';
+import { Web3ReactProvider } from '@web3-react/core';
+import { App } from 'app';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import FontFaceObserver from 'fontfaceobserver';
+import * as React from 'react';
 import 'react-app-polyfill/ie11';
 import 'react-app-polyfill/stable';
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
-import FontFaceObserver from 'fontfaceobserver';
-
+import reportWebVitals from 'reportWebVitals';
 // Use consistent styling
 import 'sanitize.css/sanitize.css';
-
-import { App } from 'app';
-
-import { HelmetProvider } from 'react-helmet-async';
-
 import { configureAppStore } from 'store/configureStore';
-
 import { ThemeProvider } from 'styles/theme/ThemeProvider';
-
-import reportWebVitals from 'reportWebVitals';
-
 // Initialize languages
 import './locales/i18n';
 
@@ -42,16 +36,51 @@ openSansObserver.load().then(() => {
 const store = configureAppStore();
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
 
+export enum SupportedChainId {
+  MAINNET = 1,
+  ROPSTEN = 3,
+  RINKEBY = 4,
+  GOERLI = 5,
+  KOVAN = 42,
+
+  ARBITRUM_ONE = 42161,
+  ARBITRUM_RINKEBY = 421611,
+  OPTIMISM = 10,
+  OPTIMISTIC_KOVAN = 69,
+}
+
+const NETWORK_POLLING_INTERVALS: { [chainId: number]: number } = {
+  [SupportedChainId.ARBITRUM_ONE]: 1000,
+  [SupportedChainId.ARBITRUM_RINKEBY]: 1000,
+  [SupportedChainId.OPTIMISM]: 1000,
+  [SupportedChainId.OPTIMISTIC_KOVAN]: 1000,
+};
+
+function getLibrary(provider: any): Web3Provider {
+  const library = new Web3Provider(provider, typeof provider.chainId === 'number' ? provider.chainId : typeof provider.chainId === 'string' ? parseInt(provider.chainId) : 'any');
+  library.pollingInterval = 15_000;
+  library.detectNetwork().then(network => {
+    const networkPollingInterval = NETWORK_POLLING_INTERVALS[network.chainId];
+    if (networkPollingInterval) {
+      console.debug('Setting polling interval', networkPollingInterval);
+      library.pollingInterval = networkPollingInterval;
+    }
+  });
+  return library;
+}
+
 ReactDOM.render(
-  <Provider store={store}>
-    <ThemeProvider>
-      <HelmetProvider>
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
-      </HelmetProvider>
-    </ThemeProvider>
-  </Provider>,
+  <Web3ReactProvider getLibrary={getLibrary}>
+    <Provider store={store}>
+      <ThemeProvider>
+        <HelmetProvider>
+          <React.StrictMode>
+            <App />
+          </React.StrictMode>
+        </HelmetProvider>
+      </ThemeProvider>
+    </Provider>
+  </Web3ReactProvider>,
   MOUNT_NODE,
 );
 

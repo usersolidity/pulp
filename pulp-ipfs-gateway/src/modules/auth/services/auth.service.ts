@@ -9,6 +9,7 @@ import {
 import { UsersRepository } from '@modules/admin/access/users/users.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ethers } from 'ethers';
 import {
     AuthCredentialsRequestDto, JwtPayload, LoginResponseDto
 } from '../dtos';
@@ -23,22 +24,30 @@ export class AuthService {
         private tokenService: TokenService,
     ) { }
 
+    public async nonce(address: string) {
+        const user = await this.usersRepository.findUserByAddress(address);
+        return user.nonce;
+    }
+
     /**
      * User authentication
      * @param authCredentialsDto {AuthCredentialsRequestDto}
      * @returns {Promise<LoginResponseDto>}
      */
     public async login({ address, signature }: AuthCredentialsRequestDto): Promise<LoginResponseDto> {
-
         const user: UserEntity = await this.usersRepository.findUserByAddress(address);
 
         if (!user) {
             throw new InvalidCredentialsException();
         }
 
-        const passwordMatch = true; // TODO: compare signature to expected w/ nonce
+        const message = `pulp ipfs storage nonce: ${user.nonce}`;
+        let messageBytes = ethers.utils.toUtf8Bytes(message);
+        let messageDigest = ethers.utils.keccak256(messageBytes);
 
-        if (!passwordMatch) {
+        const recovered_address = ethers.utils.recoverAddress(messageDigest, signature);
+
+        if (recovered_address !== address) {
             throw new InvalidCredentialsException();
         }
         if (user.status == UserStatus.Blocked) {
