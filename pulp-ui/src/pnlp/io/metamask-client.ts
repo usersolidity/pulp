@@ -120,7 +120,7 @@ export class MetamaskClient implements BlockchainService {
   // Modified from https://github.com/textileio/js-threads/blob/master/packages/crypto/src/ed25519.ts
   public async generatePnlpIdentity(ethereumAddress: EthereumAddress): Promise<PrivateKey> {
     const message = this.generateMessageForEntropy(ethereumAddress, 'pnlp');
-    const signedText = await this.signText(message);
+    const signedText = await this.sign(message);
     const hash = keccak256(signedText);
 
     // The following line converts the hash in hex to an array of 32 integers.
@@ -167,8 +167,8 @@ export class MetamaskClient implements BlockchainService {
     );
   }
 
-  private async signText(text: string): Promise<string> {
-    return await this.signer.signMessage(text);
+  public async sign(digest: string): Promise<string> {
+    return await this.signer.signMessage(digest);
   }
 }
 

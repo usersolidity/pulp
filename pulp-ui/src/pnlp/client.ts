@@ -29,6 +29,8 @@ export interface BlockchainService {
   generatePnlpIdentity(ethereumAddress: EthereumAddress): Promise<PrivateKey>;
 
   lookupEns(address: EthereumAddress): Promise<EnsAlias | undefined>;
+
+  sign(digest: string): Promise<string>;
 }
 
 export interface IpfsService {
@@ -227,5 +229,9 @@ export class PnlpClient {
 
   public async awaitTransaction(transactionId: string) {
     return this.blockchain_service.awaitTransaction(transactionId);
+  }
+
+  public async sign(digest: string): Promise<string> {
+    return this.blockchain_service.sign(digest);
   }
 }

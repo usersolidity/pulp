@@ -1,5 +1,6 @@
 import { createSelector, PayloadAction } from '@reduxjs/toolkit';
 import { pnlp_client } from 'app/pnlp-client';
+import axios from 'axios';
 import {
   ArticleDto,
   ArticleEntity,
@@ -90,11 +91,27 @@ export interface CatalogueState {
   entities: string[];
 }
 
+export interface IpfsAuthState {
+  loading_nonce: boolean;
+  nonce?: string;
+
+  address?: string;
+
+  signing_nonce?: boolean;
+  signature?: string;
+
+  loading_jwt: boolean;
+  jwt?: any;
+
+  error?: PnlpError;
+}
+
 export interface AdminState {
   publication: PublicationState;
   settings: PublicationSettingsState;
   article: ArticleState;
   identity: IdentityState;
+  ipfs_auth: IpfsAuthState;
   catalogue: CatalogueState;
 }
 
@@ -150,12 +167,19 @@ export const initialIdentityState: IdentityState = {
   loading: false,
 };
 
+export const initialIpfsAuthState: IpfsAuthState = {
+  loading_nonce: false,
+  signing_nonce: false,
+  loading_jwt: false,
+};
+
 export const initialState: AdminState = {
   publication: initialPublicationState,
   settings: initialSettingsState,
   article: initialArticleState,
   identity: initialIdentityState,
   catalogue: initialCatalogueState,
+  ipfs_auth: initialIpfsAuthState,
 };
 
 const slice = createSlice({
@@ -313,6 +337,48 @@ const slice = createSlice({
       state.identity.load_error = undefined;
       state.identity.state = undefined;
     },
+    loginToPulp(state) {
+      state.ipfs_auth.loading_nonce = true;
+      state.ipfs_auth.error = undefined;
+      state.ipfs_auth.nonce = undefined;
+    },
+    loadNonceSuccess(state, action: PayloadAction<string>) {
+      state.ipfs_auth.loading_nonce = false;
+      state.ipfs_auth.nonce = action.payload;
+    },
+    loadNonceError(state, action: PayloadAction<PnlpError>) {
+      state.ipfs_auth.loading_nonce = false;
+      state.ipfs_auth.error = action.payload;
+      state.ipfs_auth.nonce = undefined;
+    },
+    signNonce(state) {
+      state.ipfs_auth.signing_nonce = true;
+      state.ipfs_auth.error = undefined;
+    },
+    signNonceSuccess(state, action: PayloadAction<string>) {
+      state.ipfs_auth.signature = action.payload;
+      state.ipfs_auth.error = undefined;
+      state.ipfs_auth.signing_nonce = false;
+    },
+    signNonceError(state, action: PayloadAction<PnlpError>) {
+      state.ipfs_auth.signing_nonce = false;
+      state.ipfs_auth.error = action.payload;
+      state.ipfs_auth.signature = undefined;
+    },
+    loadJwt(state) {
+      state.ipfs_auth.loading_jwt = true;
+      state.ipfs_auth.error = undefined;
+    },
+    loadJwtSuccess(state, action: PayloadAction<any>) {
+      state.ipfs_auth.jwt = action.payload;
+      state.ipfs_auth.error = undefined;
+      state.ipfs_auth.loading_jwt = false;
+    },
+    loadJwtError(state, action: PayloadAction<PnlpError>) {
+      state.ipfs_auth.loading_jwt = false;
+      state.ipfs_auth.error = action.payload;
+      state.ipfs_auth.jwt = undefined;
+    },
   },
 });
 
@@ -328,6 +394,8 @@ export const selectSettings = createSelector([selectDomain], adminState => admin
 export const selectIdentity = createSelector([selectDomain], adminState => adminState.identity);
 
 export const selectCatalogue = createSelector([selectDomain], adminState => adminState.catalogue);
+
+export const selectIpfsAuth = createSelector([selectDomain], adminState => !adminState.ipfs_auth);
 
 export const selectNewAccount = createSelector([selectDomain], adminState => !adminState.catalogue?.loading && !adminState.catalogue.entities?.length);
 
@@ -487,6 +555,24 @@ export function* loadIdentity() {
   }
 }
 
+export function* loginToPulp() {
+  try {
+    const ipfs_auth: IpfsAuthState = yield select(selectIpfsAuth);
+    const nonce = yield axios.get(`http://localhost:8080/api/v1/auth/${ipfs_auth.address}/nonce`);
+    yield put(adminActions.loadNonceSuccess(nonce));
+    const signature = yield pnlp_client.sign(nonce);
+    yield put(adminActions.signNonceSuccess(signature));
+    yield put(adminActions.loadJwt());
+    const jwt = yield axios.post(`http://localhost:8080/api/v1/auth/login`, {
+      address: ipfs_auth.address,
+      signature,
+    });
+    yield put(adminActions.loadJwtSuccess(jwt));
+  } catch (err) {
+    yield put(adminActions.loadJwtError({ message: err.message }));
+  }
+}
+
 /**
  * Root saga manages watcher lifecycle
  */
@@ -505,6 +591,7 @@ export function* adminSaga() {
   yield takeLatest(adminActions.loadSettings.type, loadSettings);
   yield takeLatest(adminActions.loadIdentity.type, loadIdentity);
   yield takeLatest(adminActions.listPublications.type, listPublications);
+  yield takeLatest(adminActions.loginToPulp.type, loginToPulp);
 }
 
 export const useAdminSlice = () => {
