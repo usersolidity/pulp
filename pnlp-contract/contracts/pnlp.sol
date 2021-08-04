@@ -12,8 +12,41 @@ contract pnlp {
         uint256 timestamp;
     }
 
-    mapping (string => Publication) public publications;
-    mapping (string => Article) public articles;
+    mapping(string => Publication) public publications;
+    mapping(string => Article) public articles;
+
+    /// BEGIN HackFS Comments from conversation from 08/04
+
+    // (1) Subscriber opens Superfluid stream -> Publication
+    // (2) Author on Article Publish, create IPFS file: encrypt(ipfs/abcasdfasdf)
+
+    // solution A: security through obscurity (leave it in plaintext)
+    // solution A2: security through "NFT-effect" (leave it in plaintext, we don't care if people discover)
+
+    // solution B1: encrypt(ipfs/abcasdfasdf) => send the keys to each of subscribers
+    // solution B2: encrypt(ipfs/abcasdfasdf) x N => using key accessible to each subscriber
+
+    // where string is publicationName, subscribers
+    mapping(string => string[]) public subscribers;
+
+    // TODO: etc...
+    // where reviewerAddress, ipfsHash
+    // mapping(string => mapping(string => bool)) public reviewRequests;
+
+    // where string is ipfsHash, reviewerAddress
+    mapping(string => mapping(string => bool)) public reviews;
+
+    // where string is serverAddress, requiredReviewer
+    mapping(string => string[]) public requiredReviewers;
+
+    function reviewArticle(string memory ipfsHash, bool memory approved)
+        public
+    {
+        // TODO:etc...
+        reviews[ipfsHash][msg.sender] = approved;
+    }
+
+    /// END HackFS Comments from conversation between Dan/Brahma
 
     event CreatedPublication(string publicationName, string ipnsHash, address publisher, uint256 timestamp);
     event PublishedArticle(string publicationName, address publisher, uint256 timestamp);
