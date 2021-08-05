@@ -1,8 +1,8 @@
-import { selectIdentity } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import { useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
+import { selectIdentity } from 'store/app-state';
 import styled from 'styled-components/macro';
 
 export function Nav() {

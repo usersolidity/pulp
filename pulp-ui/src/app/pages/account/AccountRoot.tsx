@@ -5,15 +5,15 @@ import { AccountDashboard } from 'app/pages/account/AccountDashboard';
 import { AccountInfo } from 'app/pages/account/AccountInfo';
 import { AwaitingPublication } from 'app/pages/account/AwaitingPublication';
 import { NewPublication } from 'app/pages/account/NewPublication';
-import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-router-dom';
+import { selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 
 export function AccountRoot() {
   let { url } = useRouteMatch();
   let { publication_slug } = useParams<{ publication_slug?: string }>();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();

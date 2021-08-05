@@ -1,4 +1,3 @@
-import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import { PublicationPropertiesEntity } from 'pnlp/domain';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
@@ -12,12 +11,13 @@ import Row from 'react-bootstrap/Row';
 import { BsQuestionCircle } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import { selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 
 export function NewPublication() {
   const history = useHistory();
   let { url } = useRouteMatch();
 
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();

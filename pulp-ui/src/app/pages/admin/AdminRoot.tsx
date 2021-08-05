@@ -1,17 +1,17 @@
 import { Footer } from 'app/components/Footer';
 import { PageWrapper } from 'app/components/PageWrapper';
-import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import { AdminNavBar } from 'app/pages/admin/AdminNavBar';
 import { HistoryRoot } from 'app/pages/admin/history/HistoryRoot';
 import { NewArticle } from 'app/pages/admin/NewArticle/Loadable';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-router-dom';
+import { selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 
 export function AdminRoot() {
   let { url } = useRouteMatch();
   let { publication_slug } = useParams<{ publication_slug?: string }>();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();

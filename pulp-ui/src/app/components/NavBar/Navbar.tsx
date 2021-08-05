@@ -1,7 +1,7 @@
 // import { Loader } from 'app/components/NavBar/Loader';
-import { selectIdentity } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
+import { selectIdentity } from 'store/app-state';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
 import { PageWrapper } from '../PageWrapper';

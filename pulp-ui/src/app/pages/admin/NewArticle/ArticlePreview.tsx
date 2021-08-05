@@ -1,5 +1,4 @@
 import MDEditor from '@uiw/react-md-editor';
-import { selectArticle, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/esm/Col';
@@ -7,12 +6,13 @@ import Container from 'react-bootstrap/esm/Container';
 import Row from 'react-bootstrap/esm/Row';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useRouteMatch } from 'react-router-dom';
+import { selectArticle, selectPublication, useAppSlice } from 'store/app-state';
 
 export function ArticlePreview() {
   let { url } = useRouteMatch();
   let { publication_slug } = useParams<{ publication_slug?: string }>();
   // const showPreview = () => setShowPreview(true)
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const article = useSelector(selectArticle);
   const publication = useSelector(selectPublication);
   const dispatch = useDispatch();

@@ -1,5 +1,4 @@
 import { ExternalLink } from 'app/components/ExternalLink';
-import { selectCatalogue, selectIdentity, selectUserFriendlyName, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
@@ -11,10 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import { selectCatalogue, selectIdentity, selectUserFriendlyName, useAppSlice } from 'store/app-state';
 
 export function PublicationList() {
   const { t } = useTranslation();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const identity = useSelector(selectIdentity);
   const me = useSelector(selectUserFriendlyName);
   const catalogue = useSelector(selectCatalogue);

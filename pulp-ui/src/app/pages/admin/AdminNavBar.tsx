@@ -1,18 +1,18 @@
 import { Link } from 'app/components/Link';
 import { PageWrapper } from 'app/components/PageWrapper';
-import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useParams, useRouteMatch } from 'react-router-dom';
+import { selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
 
 export function AdminNavBar() {
   let { url } = useRouteMatch();
   let { publication_slug } = useParams<{ publication_slug?: string }>();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();

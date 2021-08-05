@@ -1,4 +1,4 @@
-import { AdminState } from 'app/pages/admin/admin-redux';
+import { AppState } from 'store/app-state';
 import { ThemeState } from 'styles/theme/slice/types';
 // [IMPORT NEW CONTAINERSTATE ABOVE] < Needed for generating containers seamlessly
 
@@ -10,6 +10,6 @@ import { ThemeState } from 'styles/theme/slice/types';
 */
 export interface RootState {
   theme?: ThemeState;
-  adminState?: AdminState;
+  appState?: AppState;
   // [INSERT NEW REDUCER KEY ABOVE] < Needed for generating containers seamlessly
 }

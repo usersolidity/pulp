@@ -1,14 +1,14 @@
 import MDEditor from '@uiw/react-md-editor';
-import { selectArticle, selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams, useRouteMatch } from 'react-router-dom';
+import { selectArticle, selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 
 export function ArticleRead() {
   const article = useSelector(selectArticle);
   let { url } = useRouteMatch();
   let { article_slug, publication_slug } = useParams<{ article_slug?: string; publication_slug?: string }>();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();

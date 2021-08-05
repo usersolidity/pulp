@@ -1,25 +1,27 @@
-# pnlp-publisher
+# pulp
 
-The reference implementation of a Publisher.
+pulp is the umbrella repository for the active development of the pnlp protocol and its reference implementation, pulp.
 
-# Development
+[Relevant links](https://linktr.ee/pulp_network)
+
+# Development Setup
 
 _Instructions for contributing to this repository_
 
 - clone this repo
-- cd `pnlp/pnlp-app`
+- cd `pulp-ui`
 - `npm install`
 - `npm start`
 - Visit [http://localhost:4200](http://localhost:4200)
 
-By default, the local app will connect to our ropsten network contract (specified in `environment.ts`). If you would like to instead connect to a local testnet, use the following steps in a new shell session
+By default, the local app will connect to our ropsten network contract. If you would like to instead connect to a local testnet, use the following steps in a new shell session:
 
 - `npm install -g ganache-cli`
 - `npm install -g truffle`
 - Run `ganache-cli` (Note at least one Private Key from the logs for steps below)
 - Run `cd pnlp-contract && truffle build && truffle migrate`
 - `cp pnlp-contract/build/pnlp.json pulp-ui/src/pnlp/io/pnlp.json`
-- Copy the deployed contract address into `metamask-client.ts`
+- Copy the deployed contract address into `pulp-ui/src/pnlp/io/metamask-client.ts`
 - bounce `npm start` after this is complete
 
 If you restart your local chain, don't forget to repeat the above.
@@ -28,7 +30,7 @@ To Test:
 
 - Add Metamask Chrome App if you don't already have it
 - Set Metamask blockchain to `localhost:8545`
-- Import Private Key from ganache to Metamask
+- Import Private Key that you copied from the `ganache` logs into Metamask
 
 # TODO
 
@@ -39,6 +41,8 @@ To Test:
 ###### Public Publication Homepage
 - Publication Title, Tagline, Author, article list w/ links
 - this page and read page should have admin toolbar at the top when the admin === publisher
+
+###### Factor out contract address into environment variable
 
 ###### Factor out etherscan address into environment variable
 

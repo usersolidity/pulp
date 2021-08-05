@@ -1,7 +1,7 @@
-import { selectAwaitingTransaction, selectIpfsLoading, selectIpfsWriting } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Spinner from 'react-bootstrap/esm/Spinner';
 import { useSelector } from 'react-redux';
+import { selectAwaitingTransaction, selectIpfsLoading, selectIpfsWriting } from 'store/app-state';
 
 export function Loader() {
   const ipfs_loading = useSelector(selectIpfsLoading);

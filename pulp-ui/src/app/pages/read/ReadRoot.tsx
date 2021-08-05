@@ -1,5 +1,4 @@
 import { PageWrapper } from 'app/components/PageWrapper';
-import { selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import { AdminNavBar } from 'app/pages/admin/AdminNavBar';
 import { ArticleList } from 'app/pages/read/ArticleList';
 import { ArticleRead } from 'app/pages/read/ArticleRead';
@@ -8,11 +7,12 @@ import { SubscribeForm } from 'app/pages/read/SubscribeForm';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-router-dom';
+import { selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 
 export function ReadRoot() {
   let { url } = useRouteMatch();
   let { publication_slug } = useParams<{ publication_slug?: string }>();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();

@@ -1,7 +1,7 @@
-import { selectFounderFriendlyName, selectPublication } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { selectFounderFriendlyName, selectPublication } from 'store/app-state';
 import styled from 'styled-components/macro';
 
 export function ArticleList() {

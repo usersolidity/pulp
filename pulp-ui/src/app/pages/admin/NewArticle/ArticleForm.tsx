@@ -1,5 +1,4 @@
 import MDEditor from '@uiw/react-md-editor';
-import { selectArticle, selectIdentity, selectPublication, useAdminSlice } from 'app/pages/admin/admin-redux';
 import { ArticleEntity } from 'pnlp/domain';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
@@ -10,9 +9,10 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import { BsQuestionCircle } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectArticle, selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 
 export function ArticleForm() {
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const article = useSelector(selectArticle);
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);

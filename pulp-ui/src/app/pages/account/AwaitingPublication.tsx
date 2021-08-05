@@ -1,6 +1,5 @@
 import { Link } from 'app/components/Link';
 import { Subscribe } from 'app/components/Subscribe';
-import { selectPublication } from 'app/pages/admin/admin-redux';
 import { ReactComponent as EthLogo } from 'app/pages/admin/assets/eth-grey.svg';
 import ipfs_logo from 'app/pages/admin/assets/ipfs-grey-64-wikimedia.png';
 import * as React from 'react';
@@ -14,6 +13,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
+import { selectPublication } from 'store/app-state';
 import styled from 'styled-components/macro';
 
 export function AwaitingPublication() {

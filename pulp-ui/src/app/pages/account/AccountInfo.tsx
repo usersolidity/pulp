@@ -1,5 +1,4 @@
 import { Link } from 'app/components/Link';
-import { selectCatalogue, selectIdentity, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
@@ -8,10 +7,11 @@ import Row from 'react-bootstrap/Row';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import { selectCatalogue, selectIdentity, useAppSlice } from 'store/app-state';
 
 export function AccountInfo() {
   const { t } = useTranslation();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const identity = useSelector(selectIdentity);
   const catalogue = useSelector(selectCatalogue);
   const dispatch = useDispatch();

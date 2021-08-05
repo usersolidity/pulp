@@ -90,7 +90,7 @@ export interface CatalogueState {
   entities: string[];
 }
 
-export interface AdminState {
+export interface AppState {
   publication: PublicationState;
   settings: PublicationSettingsState;
   article: ArticleState;
@@ -150,7 +150,7 @@ export const initialIdentityState: IdentityState = {
   loading: false,
 };
 
-export const initialState: AdminState = {
+export const initialState: AppState = {
   publication: initialPublicationState,
   settings: initialSettingsState,
   article: initialArticleState,
@@ -159,7 +159,7 @@ export const initialState: AdminState = {
 };
 
 const slice = createSlice({
-  name: 'adminState',
+  name: 'appState',
   initialState,
   reducers: {
     listPublications(state) {
@@ -317,41 +317,39 @@ const slice = createSlice({
 });
 
 // First select the relevant part from the state
-const selectDomain = (state: RootState) => state.adminState || initialState;
+const selectDomain = (state: RootState) => state.appState || initialState;
 
-export const selectPublication = createSelector([selectDomain], adminState => adminState.publication);
+export const selectPublication = createSelector([selectDomain], appState => appState.publication);
 
-export const selectArticle = createSelector([selectDomain], adminState => adminState.article);
+export const selectArticle = createSelector([selectDomain], appState => appState.article);
 
-export const selectSettings = createSelector([selectDomain], adminState => adminState.settings);
+export const selectSettings = createSelector([selectDomain], appState => appState.settings);
 
-export const selectIdentity = createSelector([selectDomain], adminState => adminState.identity);
+export const selectIdentity = createSelector([selectDomain], appState => appState.identity);
 
-export const selectCatalogue = createSelector([selectDomain], adminState => adminState.catalogue);
+export const selectCatalogue = createSelector([selectDomain], appState => appState.catalogue);
 
-export const selectNewAccount = createSelector([selectDomain], adminState => !adminState.catalogue?.loading && !adminState.catalogue.entities?.length);
+export const selectNewAccount = createSelector([selectDomain], appState => !appState.catalogue?.loading && !appState.catalogue.entities?.length);
 
-export const selectIpfsLoading = createSelector([selectDomain], adminState => {
-  return adminState.catalogue.loading || adminState.publication.loading || adminState.article.loading;
+export const selectIpfsLoading = createSelector([selectDomain], appState => {
+  return appState.catalogue.loading || appState.publication.loading || appState.article.loading;
 });
 
-export const selectIpfsWriting = createSelector([selectDomain], adminState => {
-  return adminState.publication.writing || adminState.article.writing;
+export const selectIpfsWriting = createSelector([selectDomain], appState => {
+  return appState.publication.writing || appState.article.writing;
 });
 
-export const selectAwaitingTransaction = createSelector([selectDomain], adminState => {
-  return adminState.publication.awaiting_tx || adminState.article.awaiting_tx;
+export const selectAwaitingTransaction = createSelector([selectDomain], appState => {
+  return appState.publication.awaiting_tx || appState.article.awaiting_tx;
 });
 
-export const selectUserFriendlyName = createSelector([selectDomain], adminState => friendlyName(adminState?.identity?.state?.ethereum_address, adminState?.identity?.ens_alias));
+export const selectUserFriendlyName = createSelector([selectDomain], appState => friendlyName(appState?.identity?.state?.ethereum_address, appState?.identity?.ens_alias));
 
-export const selectAuthorFriendlyName = createSelector([selectDomain], adminState => friendlyName(adminState?.article?.entity?.author, adminState?.article?.author_ens_alias));
+export const selectAuthorFriendlyName = createSelector([selectDomain], appState => friendlyName(appState?.article?.entity?.author, appState?.article?.author_ens_alias));
 
-export const selectFounderFriendlyName = createSelector([selectDomain], adminState =>
-  friendlyName(adminState?.publication?.entity?.founder, adminState?.publication?.founder_ens_alias),
-);
+export const selectFounderFriendlyName = createSelector([selectDomain], appState => friendlyName(appState?.publication?.entity?.founder, appState?.publication?.founder_ens_alias));
 
-export const { actions: adminActions, reducer } = slice;
+export const { actions: appActions, reducer } = slice;
 
 export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
   if (!identity?.ethereum_address || !identity?.ipns_key) {
@@ -368,9 +366,9 @@ export function* listPublications() {
 
   try {
     const response: string[] = yield pnlp_client.listPublications(identity!.state!.ipns_key);
-    yield put(adminActions.listPublicationsSuccess(response));
+    yield put(appActions.listPublicationsSuccess(response));
   } catch (err) {
-    yield put(adminActions.listPublicationsError({ message: err.message }));
+    yield put(appActions.listPublicationsError({ message: err.message }));
   }
 }
 
@@ -381,11 +379,11 @@ export function* createPublication() {
 
   try {
     const response: PublicationDto = yield pnlp_client.createPublication(publication.entity, identity!.state!.ipns_key);
-    yield put(adminActions.setPublicationMetadata(response.metadata));
+    yield put(appActions.setPublicationMetadata(response.metadata));
     yield pnlp_client.awaitTransaction(response.metadata.tx);
-    yield put(adminActions.createPublicationSuccess(response.publication));
+    yield put(appActions.createPublicationSuccess(response.publication));
   } catch (err) {
-    yield put(adminActions.createPublicationError({ message: err.message }));
+    yield put(appActions.createPublicationError({ message: err.message }));
   }
 }
 
@@ -396,9 +394,9 @@ export function* updatePublication() {
 
   try {
     const response: PublicationEntity = yield pnlp_client.updatePublication(publication.entity, identity!.state!.ipns_key);
-    yield put(adminActions.updatePublicationSuccess(response));
+    yield put(appActions.updatePublicationSuccess(response));
   } catch (err) {
-    yield put(adminActions.updatePublicationError({ message: err.message }));
+    yield put(appActions.updatePublicationError({ message: err.message }));
   }
 }
 
@@ -407,25 +405,25 @@ export function* loadPublication() {
 
   try {
     const response: PublicationEntity = yield pnlp_client.loadPublication(publication.requested_slug);
-    yield put(adminActions.loadPublicationSuccess(response));
+    yield put(appActions.loadPublicationSuccess(response));
   } catch (err) {
-    yield put(adminActions.loadPublicationError({ message: err.message }));
+    yield put(appActions.loadPublicationError({ message: err.message }));
   }
 }
 
 export function* publishArticle() {
-  const publication: ArticleState = yield select(selectPublication);
+  const publication: PublicationState = yield select(selectPublication);
   const article: ArticleState = yield select(selectArticle);
   const identity: IdentityState = yield select(selectIdentity);
 
   try {
     const response: ArticleDto = yield pnlp_client.publishArticle(article.entity, identity!.state!.ipns_key);
-    yield put(adminActions.setArticleMetadata(response.metadata));
+    yield put(appActions.setArticleMetadata(response.metadata));
     yield pnlp_client.awaitTransaction(response.metadata.tx);
-    yield put(adminActions.publishArticleSuccess(response));
+    yield put(appActions.publishArticleSuccess(response));
     yield call([history, history.push], `/read/${publication.entity.slug}/on/${article.entity.slug}`);
   } catch (err) {
-    yield put(adminActions.publishArticleError({ message: err.message }));
+    yield put(appActions.publishArticleError({ message: err.message }));
   }
 }
 
@@ -441,10 +439,10 @@ export function* loadArticle() {
       article.requested_slug.article_slug,
     );
     console.log(response);
-    yield put(adminActions.loadArticleSuccess(response.article));
-    yield put(adminActions.loadPublicationSuccess(response.publication));
+    yield put(appActions.loadArticleSuccess(response.article));
+    yield put(appActions.loadPublicationSuccess(response.publication));
   } catch (err) {
-    yield put(adminActions.loadArticleError({ message: err.message }));
+    yield put(appActions.loadArticleError({ message: err.message }));
   }
 }
 
@@ -456,9 +454,9 @@ export function* updateSettings() {
 
   try {
     const response: PublicationSettingsEntity = yield pnlp_client.updatePublicationSettings(publication.entity.slug, settings.entity, identity!.state!.ipns_key);
-    yield put(adminActions.updateSettingsSuccess(response));
+    yield put(appActions.updateSettingsSuccess(response));
   } catch (err) {
-    yield put(adminActions.updateSettingsError({ message: err.message }));
+    yield put(appActions.updateSettingsError({ message: err.message }));
   }
 }
 
@@ -469,46 +467,46 @@ export function* loadSettings() {
 
   try {
     const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug, identity!.state!.ipns_key);
-    yield put(adminActions.loadSettingsSuccess(response));
+    yield put(appActions.loadSettingsSuccess(response));
   } catch (err) {
-    yield put(adminActions.loadSettingsError({ message: err.message }));
+    yield put(appActions.loadSettingsError({ message: err.message }));
   }
 }
 
 export function* loadIdentity() {
   try {
     const response: PnlpIdentity = yield pnlp_client.establishIdentity();
-    yield put(adminActions.loadIdentitySuccess(response));
+    yield put(appActions.loadIdentitySuccess(response));
     const alias: EnsAlias | undefined = yield pnlp_client.lookupEns(response.ethereum_address);
-    yield put(adminActions.loadEnsSuccess(alias));
+    yield put(appActions.loadEnsSuccess(alias));
     yield call([history, history.push], '/account');
   } catch (err) {
-    yield put(adminActions.loadIdentityError({ message: err.message }));
+    yield put(appActions.loadIdentityError({ message: err.message }));
   }
 }
 
 /**
  * Root saga manages watcher lifecycle
  */
-export function* adminSaga() {
+export function* appSaga() {
   // Watches for loadRepos actions and calls getRepos when one comes in.
   // By using `takeLatest` only the result of the latest API call is applied.
   // It returns task descriptor (just like fork) so we can continue execution
   // It will be cancelled automatically on component unmount
-  yield takeLatest(adminActions.updatePublication.type, updatePublication);
-  yield takeLatest(adminActions.createPublication.type, createPublication);
-  yield takeLatest(adminActions.updatePublication.type, updatePublication);
-  yield takeLatest(adminActions.loadPublication.type, loadPublication);
-  yield takeLatest(adminActions.publishArticle.type, publishArticle);
-  yield takeLatest(adminActions.loadArticle.type, loadArticle);
-  yield takeLatest(adminActions.updateSettings.type, updateSettings);
-  yield takeLatest(adminActions.loadSettings.type, loadSettings);
-  yield takeLatest(adminActions.loadIdentity.type, loadIdentity);
-  yield takeLatest(adminActions.listPublications.type, listPublications);
+  yield takeLatest(appActions.updatePublication.type, updatePublication);
+  yield takeLatest(appActions.createPublication.type, createPublication);
+  yield takeLatest(appActions.updatePublication.type, updatePublication);
+  yield takeLatest(appActions.loadPublication.type, loadPublication);
+  yield takeLatest(appActions.publishArticle.type, publishArticle);
+  yield takeLatest(appActions.loadArticle.type, loadArticle);
+  yield takeLatest(appActions.updateSettings.type, updateSettings);
+  yield takeLatest(appActions.loadSettings.type, loadSettings);
+  yield takeLatest(appActions.loadIdentity.type, loadIdentity);
+  yield takeLatest(appActions.listPublications.type, listPublications);
 }
 
-export const useAdminSlice = () => {
+export const useAppSlice = () => {
   useInjectReducer({ key: slice.name, reducer: slice.reducer });
-  useInjectSaga({ key: slice.name, saga: adminSaga });
+  useInjectSaga({ key: slice.name, saga: appSaga });
   return { actions: slice.actions };
 };

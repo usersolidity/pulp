@@ -1,7 +1,6 @@
 import { Widget } from '@typeform/embed-react';
 import '@typeform/embed/build/css/widget.css';
 import { Link } from 'app/components/Link';
-import { selectIdentity, useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -11,13 +10,14 @@ import Row from 'react-bootstrap/Row';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import { selectIdentity, useAppSlice } from 'store/app-state';
 import { ReactComponent as CoinbaseWalletLogo } from './assets/login-coinbase-wallet.svg';
 import { ReactComponent as MetamaskLogo } from './assets/login-metamask.svg';
 import { content } from './content';
 
 export function LoginPage() {
   const { t } = useTranslation();
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();
   const history = useHistory();

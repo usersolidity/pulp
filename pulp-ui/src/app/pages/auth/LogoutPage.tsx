@@ -1,10 +1,10 @@
-import { useAdminSlice } from 'app/pages/admin/admin-redux';
 import * as React from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { useAppSlice } from 'store/app-state';
 
 export function LogoutPage() {
-  const { actions } = useAdminSlice();
+  const { actions } = useAppSlice();
   const dispatch = useDispatch();
   const history = useHistory();
 
