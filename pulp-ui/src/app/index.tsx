@@ -10,6 +10,8 @@ import { LoadableAccountRoot } from 'app/pages/account/LoadableAccountRoot';
 import { LoadableAdminRoot } from 'app/pages/admin/LoadableAdminRoot';
 import { LoadableAuthRoot } from 'app/pages/auth/LoadableAuthRoot';
 import { LoadableReadRoot } from 'app/pages/read/LoadableReadRoot';
+import { LoadableSubscriptionRoot } from 'app/pages/subscription/LoadableSubscriptionRoot';
+
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +35,7 @@ export function App() {
         <Route exact path={`${process.env.PUBLIC_URL}/about`} component={LoadableAboutPage} />
         <Route path={`${process.env.PUBLIC_URL}/auth`} component={LoadableAuthRoot} />
         <Route path={`${process.env.PUBLIC_URL}/account`} component={LoadableAccountRoot} />
+        <Route path={`${process.env.PUBLIC_URL}/subscription`} component={LoadableSubscriptionRoot} />
         <Route path={`${process.env.PUBLIC_URL}/admin/:publication_slug`} component={LoadableAdminRoot} />
         <Route path={`${process.env.PUBLIC_URL}/read/:publication_slug`} component={LoadableReadRoot} />
         <Route component={LoadableNotFoundPage} />

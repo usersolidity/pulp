@@ -34,12 +34,12 @@ contract pnlp {
     // mapping(string => mapping(string => bool)) public reviewRequests;
 
     // where string is ipfsHash, reviewerAddress
-    mapping(string => mapping(string => bool)) public reviews;
+    mapping(string => mapping(address => bool)) public reviews;
 
     // where string is serverAddress, requiredReviewer
     mapping(string => string[]) public requiredReviewers;
 
-    function reviewArticle(string memory ipfsHash, bool memory approved)
+    function reviewArticle(string memory ipfsHash, bool approved)
         public
     {
         // TODO:etc...

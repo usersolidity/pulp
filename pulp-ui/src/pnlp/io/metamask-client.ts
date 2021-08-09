@@ -15,8 +15,10 @@ function sleep(ms) {
 
 export class MetamaskClient implements BlockchainService {
   private contractAbi = ContractJson.abi;
-  private contractAddress: EthereumAddress = '0x93F9C9E3336A88949f3b5C8eA6764bb472a4e1b7';
-
+  //private contractAddress: EthereumAddress = '0x93F9C9E3336A88949f3b5C8eA6764bb472a4e1b7';
+  //local contract address
+  private contractAddress: EthereumAddress = '0x1E301A4A9E4C75934C6dA0aaa75a4Ad120c4ac96';
+  
   private provider: Web3Provider;
   private signer: JsonRpcSigner;
   private contract: Contract;

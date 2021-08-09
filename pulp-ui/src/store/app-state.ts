@@ -11,7 +11,8 @@ import {
   PublicationDto,
   PublicationEntity,
   PublicationMetadata,
-  PublicationSettingsEntity
+  PublicationSettingsEntity,
+  SubscriptionEntity,
 } from 'pnlp/domain';
 import { PnlpIdentity } from 'pnlp/identity';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
@@ -19,6 +20,12 @@ import { RootState } from 'types';
 import { createSlice } from 'utils/@reduxjs/toolkit';
 import history from 'utils/history';
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
+
+export interface SubscriptionState {
+  enrolled: boolean;
+  create_error?: PnlpError;
+  entity: SubscriptionEntity;
+}
 
 export interface PublicationState {
   requested_slug: string;
@@ -96,7 +103,17 @@ export interface AppState {
   article: ArticleState;
   identity: IdentityState;
   catalogue: CatalogueState;
+  subscription: SubscriptionState;
 }
+
+export const initialSubscriptionState: SubscriptionState = {
+  enrolled: false,
+  entity: {
+    fundingUser: '',
+    recipient: '',
+    amount: '',
+  },
+};
 
 export const initialPublicationState: PublicationState = {
   requested_slug: '',
@@ -156,12 +173,27 @@ export const initialState: AppState = {
   article: initialArticleState,
   identity: initialIdentityState,
   catalogue: initialCatalogueState,
+  subscription: initialSubscriptionState,
 };
 
 const slice = createSlice({
   name: 'appState',
   initialState,
   reducers: {
+    createSubscription(state) {
+      state.subscription.enrolled = true;
+    },
+    setSubscription(state, action: PayloadAction<SubscriptionEntity>) {
+      state.subscription.entity = action.payload;
+    },
+    createSubscriptionSuccess(state, action: PayloadAction<SubscriptionEntity>) {
+      state.subscription.enrolled = true;
+      state.subscription.entity = action.payload;
+    },
+    createSubscriptionError(state, action: PayloadAction<PnlpError>) {
+      state.subscription.enrolled = false;
+      state.subscription.create_error = action.payload;
+    },
     listPublications(state) {
       state.catalogue.loading = true;
       state.catalogue.load_error = undefined;
@@ -319,6 +351,8 @@ const slice = createSlice({
 // First select the relevant part from the state
 const selectDomain = (state: RootState) => state.appState || initialState;
 
+export const selectSubscription = createSelector([selectDomain], appState => appState.subscription);
+
 export const selectPublication = createSelector([selectDomain], appState => appState.publication);
 
 export const selectArticle = createSelector([selectDomain], appState => appState.article);
@@ -360,6 +394,18 @@ export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
 /**
  * Begin Sagas
  */
+ export function* createSubscription() {
+  const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
+  alert('in create Susbcriptions - app-state.ts');
+  try {
+     yield pnlp_client.createSubscription(identity!.state!.ipns_key);
+    //yield put(appActions.createSubscriptionSuccess(response));
+  } catch (err) {
+    yield put(appActions.createSubscriptionError({ message: err.message }));
+  }
+}
+
 export function* listPublications() {
   const identity: IdentityState = yield select(selectIdentity);
   throwIfUnauthorized(identity?.state);
@@ -503,6 +549,7 @@ export function* appSaga() {
   yield takeLatest(appActions.loadSettings.type, loadSettings);
   yield takeLatest(appActions.loadIdentity.type, loadIdentity);
   yield takeLatest(appActions.listPublications.type, listPublications);
+  yield takeLatest(appActions.createSubscription.type, createSubscription);
 }
 
 export const useAppSlice = () => {

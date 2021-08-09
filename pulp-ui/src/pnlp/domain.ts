@@ -88,6 +88,13 @@ export interface SubscriberEntity {
   bitclout?: BitcloutAddress;
 }
 
+export interface SubscriptionEntity {
+  fundingUser: EthereumAddress;
+  recipient: EthereumAddress;
+  amount: string;
+}
+
+
 export interface StatsEntity {
   articles?: {
     read_series?: {

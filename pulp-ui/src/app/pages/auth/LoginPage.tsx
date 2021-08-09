@@ -31,7 +31,7 @@ export function LoginPage() {
   return (
     <>
       <Container>
-        <Row hidden>
+        <Row>
           <Col>
             <Widget id="XLkNLWgO" style={{ width: '100%', height: '600px' }} className="my-form" tooltip="Hi there! Pulp is in alpha." buttonColor="#007bff" />
           </Col>
@@ -43,7 +43,7 @@ export function LoginPage() {
               <Card.Header className="title">{t(content.signIn())}</Card.Header>
               <Card.Body>
                 <div className="mb-3">
-                  <Button block size="lg" variant="outline-secondary" onClick={onLoginMetamask} disabled>
+                  <Button block size="lg" variant="outline-secondary" onClick={onLoginMetamask}>
                     <MetamaskLogo style={{ width: '1.25rem', height: '1.25rem' }} /> Metamask
                   </Button>
                 </div>

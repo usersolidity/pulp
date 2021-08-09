@@ -11,7 +11,8 @@ import {
   PublicationDto,
   PublicationEntity,
   PublicationMetadata,
-  PublicationSettingsEntity
+  PublicationSettingsEntity,
+  SubscriptionEntity,
 } from 'pnlp/domain';
 import { PnlpIdentity } from 'pnlp/identity';
 
@@ -67,6 +68,11 @@ export class PnlpClient {
       ipns_key: ipns_identity,
       ethereum_address: ethereumAddress,
     };
+  }
+
+  public async createSubscription(fundingAddress: string, recipient: string, amount: string) {
+    console.debug(`create Subscriptions...`);
+    alert('Am i visiting here');
   }
 
   public async createPublication(publication: PublicationEntity, identity: PrivateKey): Promise<PublicationDto> {
