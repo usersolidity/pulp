@@ -186,9 +186,8 @@ const slice = createSlice({
     setSubscription(state, action: PayloadAction<SubscriptionEntity>) {
       state.subscription.entity = action.payload;
     },
-    createSubscriptionSuccess(state, action: PayloadAction<SubscriptionEntity>) {
+    createSubscriptionSuccess(state) {
       state.subscription.enrolled = true;
-      state.subscription.entity = action.payload;
     },
     createSubscriptionError(state, action: PayloadAction<PnlpError>) {
       state.subscription.enrolled = false;
@@ -396,11 +395,12 @@ export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
  */
  export function* createSubscription() {
   const identity: IdentityState = yield select(selectIdentity);
+  const subscription: SubscriptionState = yield select(selectSubscription);
   throwIfUnauthorized(identity?.state);
   alert('in create Susbcriptions - app-state.ts');
   try {
-     yield pnlp_client.createSubscription(identity!.state!.ipns_key);
-    //yield put(appActions.createSubscriptionSuccess(response));
+     yield pnlp_client.createSubscription(subscription.entity.fundingUser, subscription.entity.recipient, subscription.entity.amount);
+     yield put(appActions.createSubscriptionSuccess());
   } catch (err) {
     yield put(appActions.createSubscriptionError({ message: err.message }));
   }

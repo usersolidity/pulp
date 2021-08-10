@@ -22,15 +22,15 @@ export function SubscriptionRoot() {
     React.useEffect(effect, []);
   };
 
-  useEffectOnMount(() => {
-    // if (!identity.state) {
-    //   alert('need to login')
-    //   history.push('/auth/login');
-    //   return;
-    // }
+  // useEffectOnMount(() => {
+  //   // if (!identity.state) {
+  //   //   alert('need to login')
+  //   //   history.push('/auth/login');
+  //   //   return;
+  //   // }
 
-    dispatch(actions.createSubscription());
-  });
+  //   //dispatch(actions.createSubscription());
+  // });
 
   return (
     <>

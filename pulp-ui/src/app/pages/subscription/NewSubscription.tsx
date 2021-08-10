@@ -11,24 +11,30 @@ import { BsQuestionCircle } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { selectIdentity, selectSubscription, useAppSlice } from 'store/app-state';
-
+import type { Flow } from '@superfluid-finance/js-sdk';
 import { ExternalProvider, Web3Provider } from '@ethersproject/providers';
 
 const SuperfluidSDK = require('@superfluid-finance/js-sdk');
 const Web3 = require('web3');
 
-//const DAIx_ropsten = '0xBF6201a6c48B56d8577eDD079b84716BB4918E8A';
+const DAIx_ropsten = '0xBF6201a6c48B56d8577eDD079b84716BB4918E8A';
 const ETHx_ropsten = '0x6fC99F5591b51583ba15A8C2572408257A1D2797';
+const DAIx_rinkeby = "0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90";
+
+type DetailsProps = {
+  address: string
+  netFlow: string
+  inFlows: Array<Flow>
+  outFlows: Array<Flow>
+}
 
 type WindowInstanceWithEthereum = Window & typeof globalThis & { ethereum: ExternalProvider & { request: (request: { method: string; params?: Array<any> }) => Promise<any> } };
 
 export function NewSubscription() {
-  const [sf, setSf] = React.useState<string>('');
-  const [fundingUser, setFundingUser] = React.useState<string>('');
+  const windowWeb3 = window as any;
+  const [fundingUser, setFundingUser] = React.useState<DetailsProps | any>();
   const [fundingFlow, setFundingFlow] = React.useState<string>('');
-
-
-  let flowRate: string =  '385802469136';
+  const flowRate = '385802469136'; //1 DAIx per month
 
   const history = useHistory();
   let { url } = useRouteMatch();
@@ -38,52 +44,47 @@ export function NewSubscription() {
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();
 
-  //initialize Superfluid stuff
   React.useEffect(() => {
-    // async function initSuperFluid() {
-    //   const sf = new SuperfluidSDK.Framework({
-    //     web3: new Web3((window as WindowInstanceWithEthereum).ethereum),
-    //   });
-    //   await sf.initialize();
-    //   setSf(sf);
+    async function initSuperFluid() {
+      const sf = new SuperfluidSDK.Framework({
+        web3: new Web3((window as WindowInstanceWithEthereum).ethereum),
+      });
+      await sf.initialize();
 
-    //   const fundingUser = sf.user({
-    //     address: '0x343712AbA29A21c9eB50Cc98D556028485146913',
-    //      token: ETHx_ropsten
-    //   });
-    //   setFundingUser(fundingUser);
-    // }
-    // initSuperFluid();
-  },[]) ;
+      const fundingUser = sf.user({
+        //update the address from identity
+        address: identity.state?.ethereum_address, //Is this the way to get Address???
+        token: DAIx_rinkeby
+      });
+      setFundingUser(fundingUser);
+    }
+    initSuperFluid();
+  },[]);
 
   const startFlow = async () => {
-    console.log('recipient: ' )
-  
-    // await fundingUser.flow({
-    //   recipient: fundingRecipient,
-    //   flowRate: flowRate //'385802469136'  //1 DAIx per month
-    // });
-
-    // const details = await fundingUser.details();
-    // setFundingFlow(details.cfa.netFlow);
-    // console.log(details.cfa.netFlow);
+    if (subscription.entity.recipient && flowRate) {
+      await fundingUser.flow({ recipient: subscription.entity.recipient, flowRate });
+    }
   }
 
-  const stopFlow = async (recipient) => {
-    // await fundingUser.flow({
-    //   recipient: recipient,
-    //   flowRate: "0"
-    // });
+  const getFlow = async () => {
+    const details = await fundingUser.details();
+    setFundingFlow(details.cfa.netFlow);
+    console.log(fundingFlow);
+  }
+
+  const stopFlow = async () => {
+    await fundingUser.flow({
+      recipient: subscription.entity.recipient,
+      flowRate: "0"
+    });
   }
 
 
   const onChangeSubscription = (value: Partial<SubscriptionEntity>) => {
     const updated_subscription = {
       ...subscription.entity,
-      properties: {
-        ...subscription.entity,
-        ...value,
-      },
+      ...value
     };
     dispatch(actions.setSubscription(updated_subscription));
   };
@@ -92,16 +93,17 @@ export function NewSubscription() {
     if (evt !== undefined && evt.preventDefault) {
       evt.preventDefault();
     }
-    if (!identity.state?.ethereum_address) {
-      throw new Error('Cannot create subscription without key provider.');
-    }
-    const updated_subscription = {
-      ...subscription.entity,
-      founder: identity.state?.ethereum_address,
-    };
-    dispatch(actions.setSubscription(updated_subscription));
-    dispatch(actions.createSubscription());
-    //history.push(`/account/publishing`);
+    // if (!identity.state?.ethereum_address) {
+    //   throw new Error('Cannot create subscription without key provider.');
+    // }
+    // const updated_subscription = {
+    //   ...subscription.entity,
+    //   founder: identity.state?.ethereum_address,
+    // };
+    // dispatch(actions.setSubscription(updated_subscription));
+    // dispatch(actions.createSubscription());
+    // history.push(`/account/publishing`);
+    startFlow();
   };
 
   const [fade, setFade] = React.useState<boolean | undefined>(false);
@@ -137,7 +139,6 @@ export function NewSubscription() {
                     <Form.Control
                       type="input"
                       placeholder="My account address to send fund from: "
-                      value={subscription.entity.fundingUser}
                       onChange={e =>
                         onChangeSubscription({
                           fundingUser: e.currentTarget.value,
@@ -151,7 +152,6 @@ export function NewSubscription() {
                     <Form.Control
                       type="input"
                       placeholder="provide the address of the Author or content"
-                      value={subscription.entity.recipient}
                       onChange={e =>
                         onChangeSubscription({
                           recipient: e.currentTarget.value,
@@ -165,7 +165,6 @@ export function NewSubscription() {
                     <Form.Control
                       type="input"
                       placeholder="385802469136"
-                      value={subscription.entity.amount}
                       onChange={e =>
                         onChangeSubscription({
                           amount: e.currentTarget.value,
@@ -183,7 +182,7 @@ export function NewSubscription() {
                     />
                   </Form.Group>
                   <Button variant="primary" block size="lg" type="submit">
-                    🚀 Submit
+                  🕵🏻‍♂️ Create Subscription
                   </Button>
                 </Form>
               </Card.Body>
