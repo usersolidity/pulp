@@ -2,6 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/keccak256';
 import { ExternalProvider, JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
+import SuperfluidSDK from '@superfluid-finance/js-sdk';
 import { PrivateKey } from '@textile/hub';
 import { BlockchainService } from 'pnlp/client';
 import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata } from 'pnlp/domain';
@@ -9,20 +10,18 @@ import ContractJson from './pnlp.json';
 
 type WindowInstanceWithEthereum = Window & typeof globalThis & { ethereum: ExternalProvider & { request: (request: { method: string; params?: Array<any> }) => Promise<any> } };
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export class MetamaskClient implements BlockchainService {
   private contractAbi = ContractJson.abi;
   //contract address in ROPSTEN
   private contractAddress: EthereumAddress = '0x5B64b955039Aca748b42fCf0942F33A3a530A0e9';
   //local contract address
   //private contractAddress: EthereumAddress = '0x6e7987EC732832c9bEA4712156985da2CC72018b';
-  
+
   private provider: Web3Provider;
   private signer: JsonRpcSigner;
   private contract: Contract;
+  private superfluid: any;
+  private superfluid_initialized = false;
 
   constructor() {
     if (!this.contractAddress) {
@@ -37,6 +36,8 @@ export class MetamaskClient implements BlockchainService {
     this.provider = new Web3Provider((window as WindowInstanceWithEthereum).ethereum);
     this.signer = this.provider.getSigner();
     this.contract = new Contract(this.contractAddress, this.contractAbi, this.signer);
+
+    this.superfluid = new SuperfluidSDK.Framework({ web3: this.provider });
   }
 
   public async createPublication(publication_slug: string, ipns_hash: IpfsHash): Promise<EthereumTransactionId> {
@@ -80,6 +81,21 @@ export class MetamaskClient implements BlockchainService {
       founder: publication.founder,
       timestamp: new Date(publication.timestamp.toNumber() * 1000),
     };
+  }
+
+  public async subscribe(recipient: EthereumAddress, token: EthereumAddress, flowRate: number) {
+    if (!this.superfluid_initialized) {
+      this.initializeSuperfluid();
+    }
+
+    const subscriber = await this.getAccount();
+
+    const fundingUser = this.superfluid.user({
+      address: subscriber,
+      token: token,
+    });
+
+    await fundingUser.flow({ recipient, flowRate });
   }
 
   public async publishArticle(publication_slug: string, ipfs_hash: IpfsHash): Promise<EthereumTransactionId> {
@@ -171,7 +187,12 @@ export class MetamaskClient implements BlockchainService {
   }
 
   private async signText(text: string): Promise<string> {
-    return await this.signer.signMessage(text);
+    return this.signer.signMessage(text);
+  }
+
+  private async initializeSuperfluid(): Promise<void> {
+    await this.superfluid.initialize();
+    this.superfluid_initialized = true;
   }
 }
 

@@ -12,7 +12,7 @@ import {
   PublicationEntity,
   PublicationMetadata,
   PublicationSettingsEntity,
-  SubscriptionEntity,
+  SubscriptionEntity
 } from 'pnlp/domain';
 import { PnlpIdentity } from 'pnlp/identity';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
@@ -23,7 +23,8 @@ import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 
 export interface SubscriptionState {
   enrolled: boolean;
-  create_error?: PnlpError;
+  loading: boolean;
+  error?: PnlpError;
   entity: SubscriptionEntity;
 }
 
@@ -108,10 +109,12 @@ export interface AppState {
 
 export const initialSubscriptionState: SubscriptionState = {
   enrolled: false,
+  loading: false,
   entity: {
-    fundingUser: '',
+    subscriber: '',
     recipient: '',
-    amount: '',
+    amount: '385802469136',
+    token: '0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90', // DAIx Rinkeby: TODO: parameterize
   },
 };
 
@@ -181,17 +184,20 @@ const slice = createSlice({
   initialState,
   reducers: {
     createSubscription(state) {
-      state.subscription.enrolled = true;
+      state.subscription.loading = true;
+      state.subscription.error = undefined;
     },
     setSubscription(state, action: PayloadAction<SubscriptionEntity>) {
       state.subscription.entity = action.payload;
     },
-    createSubscriptionSuccess(state) {
-      state.subscription.enrolled = true;
+    createSubscriptionSuccess(state, action: PayloadAction<SubscriptionEntity>) {
+      state.subscription.loading = false;
+      state.subscription.error = undefined;
+      state.subscription.entity = action.payload;
     },
     createSubscriptionError(state, action: PayloadAction<PnlpError>) {
       state.subscription.enrolled = false;
-      state.subscription.create_error = action.payload;
+      state.subscription.error = action.payload;
     },
     listPublications(state) {
       state.catalogue.loading = true;
@@ -393,14 +399,12 @@ export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
 /**
  * Begin Sagas
  */
- export function* createSubscription() {
-  const identity: IdentityState = yield select(selectIdentity);
+export function* createSubscription() {
   const subscription: SubscriptionState = yield select(selectSubscription);
-  throwIfUnauthorized(identity?.state);
-  alert('in create Susbcriptions - app-state.ts');
+  const publication: PublicationState = yield select(selectPublication);
   try {
-     yield pnlp_client.createSubscription(subscription.entity.fundingUser, subscription.entity.recipient, subscription.entity.amount);
-     yield put(appActions.createSubscriptionSuccess());
+    yield pnlp_client.subscribe(publication.entity.slug, subscription.entity.recipient, parseInt(subscription.entity.amount));
+    yield put(appActions.createSubscriptionSuccess(subscription.entity));
   } catch (err) {
     yield put(appActions.createSubscriptionError({ message: err.message }));
   }

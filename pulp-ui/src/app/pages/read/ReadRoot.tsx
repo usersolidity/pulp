@@ -37,7 +37,7 @@ export function ReadRoot() {
         <Switch>
           <Route exact path={`${url}`} component={ArticleList} />
           <Route path={`/read/:publication_slug/on/:article_slug`} component={ArticleRead} />
-          <Route path={`${url}/subscribe`} component={SubscribeForm} />
+          <Route path={`/read/:publication_slug/subscribe`} component={SubscribeForm} />
         </Switch>
       </PageWrapper>
     </>

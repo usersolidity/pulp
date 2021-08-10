@@ -1,3 +1,4 @@
+import { Link } from 'app/components/Link';
 import { PageWrapper } from 'app/components/PageWrapper';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
@@ -20,7 +21,9 @@ export function ReadNavBar() {
     <Wrapper>
       <PageWrapper>
         <TitleWrapper>
-          <Title href="/">{publication?.entity?.properties?.title}</Title>
+          <Link to={`/read/${publication_slug}`}>
+            <Title>{publication?.entity?.properties?.title}</Title>
+          </Link>
         </TitleWrapper>
         <NavWrapper>
           <Item>
@@ -63,7 +66,7 @@ const TitleWrapper = styled.div`
   align-items: center;
 `;
 
-const Title = styled.a`
+const Title = styled.span`
   font-size: 1.3rem;
   color: ${p => p.theme.primary};
   font-weight: bold;

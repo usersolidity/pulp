@@ -11,8 +11,7 @@ import {
   PublicationDto,
   PublicationEntity,
   PublicationMetadata,
-  PublicationSettingsEntity,
-  SubscriptionEntity,
+  PublicationSettingsEntity
 } from 'pnlp/domain';
 import { PnlpIdentity } from 'pnlp/identity';
 
@@ -20,6 +19,8 @@ export interface BlockchainService {
   createPublication(publication_slug: string, ipns_address: IpnsHash): Promise<EthereumTransactionId>;
 
   getPublication(publication_slug: string): Promise<PublicationMetadata>;
+
+  subscribe(recipient: EthereumAddress, token: EthereumAddress, flowRate: number);
 
   publishArticle(publication_slug: string, ipfs_hash: IpfsHash): Promise<EthereumTransactionId>;
 
@@ -70,9 +71,19 @@ export class PnlpClient {
     };
   }
 
-  public async createSubscription(fundingAddress: string, recipient: string, amount: string) {
-    console.debug(`create Subscriptions...`);
-    alert('Am i visiting here');
+  public async subscribe(publication_slug: string, token: EthereumAddress, flow_rate: number) {
+    console.debug(`fetching ${publication_slug}...`);
+
+    const publication_record = await this.blockchain_service.getPublication(publication_slug);
+
+    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
+
+    const path = `/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`;
+    const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(path);
+
+    await this.blockchain_service.subscribe(publication.founder, token, flow_rate);
+
+    return publication;
   }
 
   public async createPublication(publication: PublicationEntity, identity: PrivateKey): Promise<PublicationDto> {

@@ -1,10 +1,15 @@
 import { Link } from 'app/components/Link';
 import * as React from 'react';
+import { useSelector } from 'react-redux';
+import { LinkContainer } from 'react-router-bootstrap';
+import { selectIdentity } from 'store/app-state';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
 import { PageWrapper } from './PageWrapper';
 
 export function Footer() {
+  const identity = useSelector(selectIdentity);
+
   return (
     <Wrapper>
       <PageWrapper>
@@ -17,9 +22,9 @@ export function Footer() {
         <Link to={{ pathname: 'https://gitcoin.co/grants/2776/pulp-network-2' }} target="_blank">
           Development Grants
         </Link>{' '}
-        <Link to={{ pathname: 'https://gitcoin.co/grants/2776/pulp-network-2' }} target="_blank">
-          Subscribe
-        </Link>{' '}
+        <LinkContainer to={identity?.state ? '/subscription/new' : '/about'}>
+          <span>Subscribe</span>
+        </LinkContainer>{' '}
       </PageWrapper>
     </Wrapper>
   );

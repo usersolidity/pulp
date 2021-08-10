@@ -20,7 +20,7 @@ export function ArticleList() {
       <div className="lead mt-1">By: {founder_friendly_name}</div>
       <List>
         {Object.entries(publication.entity.articles).map(([s, a], i) => (
-          <Feature onClick={() => onSelect(publication.entity.slug, s)}>
+          <Feature onClick={() => onSelect(publication.entity.slug, s)} key={i}>
             {/* <CSSIcon className="feature-icon" /> */}
             <Content>
               <div className="lead">{a.title}</div>

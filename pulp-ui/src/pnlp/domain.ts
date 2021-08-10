@@ -89,11 +89,11 @@ export interface SubscriberEntity {
 }
 
 export interface SubscriptionEntity {
-  fundingUser: EthereumAddress;
+  subscriber: EthereumAddress;
   recipient: EthereumAddress;
   amount: string;
+  token: EthereumAddress;
 }
-
 
 export interface StatsEntity {
   articles?: {

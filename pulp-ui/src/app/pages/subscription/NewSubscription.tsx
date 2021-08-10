@@ -1,3 +1,5 @@
+import { ExternalProvider } from '@ethersproject/providers';
+import type { Flow } from '@superfluid-finance/js-sdk';
 import { SubscriptionEntity } from 'pnlp/domain';
 import * as React from 'react';
 import Button from 'react-bootstrap/Button';
@@ -11,22 +13,20 @@ import { BsQuestionCircle } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { selectIdentity, selectSubscription, useAppSlice } from 'store/app-state';
-import type { Flow } from '@superfluid-finance/js-sdk';
-import { ExternalProvider, Web3Provider } from '@ethersproject/providers';
 
 const SuperfluidSDK = require('@superfluid-finance/js-sdk');
 const Web3 = require('web3');
 
 const DAIx_ropsten = '0xBF6201a6c48B56d8577eDD079b84716BB4918E8A';
 const ETHx_ropsten = '0x6fC99F5591b51583ba15A8C2572408257A1D2797';
-const DAIx_rinkeby = "0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90";
+const DAIx_rinkeby = '0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90';
 
 type DetailsProps = {
-  address: string
-  netFlow: string
-  inFlows: Array<Flow>
-  outFlows: Array<Flow>
-}
+  address: string;
+  netFlow: string;
+  inFlows: Array<Flow>;
+  outFlows: Array<Flow>;
+};
 
 type WindowInstanceWithEthereum = Window & typeof globalThis & { ethereum: ExternalProvider & { request: (request: { method: string; params?: Array<any> }) => Promise<any> } };
 
@@ -54,37 +54,36 @@ export function NewSubscription() {
       const fundingUser = sf.user({
         //update the address from identity
         address: identity.state?.ethereum_address, //Is this the way to get Address???
-        token: DAIx_rinkeby
+        token: DAIx_rinkeby,
       });
       setFundingUser(fundingUser);
     }
     initSuperFluid();
-  },[]);
+  }, []);
 
   const startFlow = async () => {
     if (subscription.entity.recipient && flowRate) {
-      await fundingUser.flow({ recipient: subscription.entity.recipient, flowRate });
+      await fundingUser.flow({ recipient: subscription.entity.recipient, flowRate: subscription.entity.amount });
     }
-  }
+  };
 
   const getFlow = async () => {
     const details = await fundingUser.details();
     setFundingFlow(details.cfa.netFlow);
     console.log(fundingFlow);
-  }
+  };
 
   const stopFlow = async () => {
     await fundingUser.flow({
       recipient: subscription.entity.recipient,
-      flowRate: "0"
+      flowRate: '0',
     });
-  }
-
+  };
 
   const onChangeSubscription = (value: Partial<SubscriptionEntity>) => {
     const updated_subscription = {
       ...subscription.entity,
-      ...value
+      ...value,
     };
     dispatch(actions.setSubscription(updated_subscription));
   };
@@ -136,15 +135,7 @@ export function NewSubscription() {
                 <Form onSubmit={onSubmitForm}>
                   <Form.Group controlId="exampleForm.ControlInput1">
                     <Form.Label className="text-muted small">Funding User Address</Form.Label>
-                    <Form.Control
-                      type="input"
-                      placeholder="My account address to send fund from: "
-                      onChange={e =>
-                        onChangeSubscription({
-                          fundingUser: e.currentTarget.value,
-                        })
-                      }
-                    />
+                    <Form.Control type="input" disabled value={identity.state?.ethereum_address} />
                   </Form.Group>
 
                   <Form.Group controlId="exampleForm.ControlInput1">
@@ -182,7 +173,7 @@ export function NewSubscription() {
                     />
                   </Form.Group>
                   <Button variant="primary" block size="lg" type="submit">
-                  🕵🏻‍♂️ Create Subscription
+                    🕵🏻‍♂️ Create Subscription
                   </Button>
                 </Form>
               </Card.Body>
