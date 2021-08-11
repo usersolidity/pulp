@@ -1,5 +1,7 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import { createInjectorsEnhancer } from 'redux-injectors';
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import createSagaMiddleware from 'redux-saga';
 import { createReducer } from './reducers';
 
@@ -18,8 +20,16 @@ export function configureAppStore() {
     }),
   ];
 
+  const persistConfig = {
+    key: 'root',
+    storage,
+  };
+
+  const reducer = createReducer();
+  const persistedReducer = persistReducer(persistConfig, reducer);
+
   const store = configureStore({
-    reducer: createReducer(),
+    reducer: persistedReducer,
     middleware: [
       ...getDefaultMiddleware({
         serializableCheck: false,
@@ -32,5 +42,7 @@ export function configureAppStore() {
     enhancers,
   });
 
-  return store;
+  const persistor = persistStore(store);
+
+  return { store, persistor };
 }

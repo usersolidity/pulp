@@ -137,7 +137,7 @@ export function NewPublication() {
                     />
                   </Form.Group>
                   <Button variant="primary" block size="lg" type="submit">
-                    🚀 To the Moon
+                    🚀 Lift Off
                   </Button>
                 </Form>
               </Card.Body>

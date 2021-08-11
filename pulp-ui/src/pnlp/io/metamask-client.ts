@@ -8,12 +8,19 @@ import { BlockchainService } from 'pnlp/client';
 import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata } from 'pnlp/domain';
 import ContractJson from './pnlp.json';
 
-type WindowInstanceWithEthereum = Window & typeof globalThis & { ethereum: ExternalProvider & { request: (request: { method: string; params?: Array<any> }) => Promise<any> } };
+type WindowInstanceWithEthereum = Window &
+  typeof globalThis & {
+    ethereum: ExternalProvider & {
+      request: (request: { method: string; params?: Array<any> }) => Promise<any>;
+      on: (event: string, onChange: (accounts: string[]) => any) => Promise<any>;
+    };
+  };
 
 export class MetamaskClient implements BlockchainService {
   private contractAbi = ContractJson.abi;
   //contract address in ROPSTEN
-  private contractAddress: EthereumAddress = '0x5B64b955039Aca748b42fCf0942F33A3a530A0e9';
+  // private contractAddress: EthereumAddress = '0x5B64b955039Aca748b42fCf0942F33A3a530A0e9'; // ropsten
+  private contractAddress: EthereumAddress = '0x8C4533716A13587481d74dd44b49b43f284298D8'; // rinkeby
   //local contract address
   //private contractAddress: EthereumAddress = '0x6e7987EC732832c9bEA4712156985da2CC72018b';
 
@@ -54,7 +61,7 @@ export class MetamaskClient implements BlockchainService {
   public async getPublication(publication_slug: string): Promise<PublicationMetadata> {
     type EthereumPublication = [string, string, BigNumber] & {
       ipnsHash: string;
-      founder: string;
+      publisher: string;
       timestamp: BigNumber;
     };
     console.debug(`fetching publication ${publication_slug} from ethereum blockchain...`);
@@ -68,17 +75,17 @@ export class MetamaskClient implements BlockchainService {
     }
 
     // If a publication_slug does not exist, throw
-    if (publication.ipnsHash === '' && publication.founder === '0x0000000000000000000000000000000000000000' && publication.timestamp.toHexString() === '0x00') {
+    if (publication.ipnsHash === '' && publication.publisher === '0x0000000000000000000000000000000000000000' && publication.timestamp.toHexString() === '0x00') {
       throw new Error('Publication does not exist');
     }
 
     // TODO:PUBLICATION_AUTHOR:
-    console.debug(`found publication at ${publication.ipnsHash} published by ${publication.founder} on ${publication.timestamp}`);
+    console.debug(`found publication at ${publication.ipnsHash} published by ${publication.publisher} on ${publication.timestamp}`);
 
     return {
       ipns: publication.ipnsHash.replace('ipns/', ''), // TODO: we should remove the prefix from the contract
       tx: 'TODO',
-      founder: publication.founder,
+      founder: publication.publisher,
       timestamp: new Date(publication.timestamp.toNumber() * 1000),
     };
   }
@@ -110,10 +117,19 @@ export class MetamaskClient implements BlockchainService {
     return transaction.hash;
   }
 
-  public async getAccount(): Promise<EthereumAddress> {
+  public async getAccount(onChange?: Function): Promise<EthereumAddress> {
     const accounts = await (window as WindowInstanceWithEthereum).ethereum.request({ method: 'eth_requestAccounts' });
     if (accounts.length === 0) {
       throw new Error('No account is provided. Please provide an account to this application.');
+    }
+
+    if (onChange) {
+      console.log('setting hook...');
+      (window as WindowInstanceWithEthereum).ethereum.on('accountsChanged', function (accounts) {
+        console.log('ethereum just changed accounts...');
+        console.log(accounts);
+        onChange(accounts[0]);
+      });
     }
 
     return accounts[0];

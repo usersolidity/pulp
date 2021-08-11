@@ -26,7 +26,7 @@ export interface BlockchainService {
 
   awaitTransaction(transactionId: EthereumTransactionId): Promise<any>; //TODO: transaction result metadata
 
-  getAccount(): Promise<EthereumAddress>;
+  getAccount(onChange?: Function): Promise<EthereumAddress>;
 
   generatePnlpIdentity(ethereumAddress: EthereumAddress): Promise<PrivateKey>;
 
@@ -61,8 +61,8 @@ export class PnlpClient {
     return this.blockchain_service.lookupEns(ethereum_address);
   }
 
-  public async establishIdentity(): Promise<PnlpIdentity> {
-    const ethereumAddress = await this.blockchain_service.getAccount();
+  public async establishIdentity(onChange?: Function): Promise<PnlpIdentity> {
+    const ethereumAddress = await this.blockchain_service.getAccount(onChange);
     const ipns_identity = await this.blockchain_service.generatePnlpIdentity(ethereumAddress);
 
     return {

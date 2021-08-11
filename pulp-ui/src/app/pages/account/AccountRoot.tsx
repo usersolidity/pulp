@@ -1,4 +1,3 @@
-import { Footer } from 'app/components/Footer';
 import { NavBar } from 'app/components/NavBar/Navbar';
 import { PageWrapper } from 'app/components/PageWrapper';
 import { AccountDashboard } from 'app/pages/account/AccountDashboard';
@@ -44,7 +43,7 @@ export function AccountRoot() {
           <Route exact path={`${url}/info`} component={AccountInfo} />
         </Switch>
       </PageWrapper>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

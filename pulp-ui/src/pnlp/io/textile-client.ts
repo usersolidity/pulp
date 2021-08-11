@@ -20,7 +20,7 @@ class TextileClient implements IpfsService {
   // this is an insecure key from textile hub. it is okay to share and publish on github.
   // do NOT put production secure keys here.
   private auth: KeyInfo = {
-    key: 'bmsseosox3ocnb3t7d6qf6ur6gm',
+    key: 'bqpml3jj4afgmldkggb73cpvffy',
     secret: '',
   };
 

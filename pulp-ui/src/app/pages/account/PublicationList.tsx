@@ -29,40 +29,72 @@ export function PublicationList() {
   return (
     <>
       <Container className="mt-5">
-        <Row>
-          <Col xs={0} md={2}></Col>
-          <Col xs={6} md={4}>
-            <div className="text-muted lead">
-              By: <ExternalLink href={'https://etherscan.io/address/' + identity.state?.ethereum_address}>{me}</ExternalLink>
-            </div>
-          </Col>
-          <Col xs={0} md={1}></Col>
-          <Col xs={6} md={3} className="text-right">
-            <LinkContainer className="mb-5" to="/account/new">
-              <Button size="sm" variant="outline-primary">
-                New Publication
-              </Button>
-            </LinkContainer>{' '}
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={0} md={2}></Col>
-          <Col xs={0} md={8} className="text-center">
-            {catalogue?.loading && !catalogue?.entities?.length && (
-              <Spinner animation="grow" variant="secondary" role="status">
-                <span className="sr-only">Loading...</span>
-              </Spinner>
-            )}
-            <div>{catalogue.load_error ? 'Error loading publications: ' + catalogue.load_error.message : ''}</div>
-            <ListGroup variant="flush" className="mt-4 mb-4">
-              {catalogue.entities.map((s, i) => (
-                <ListGroup.Item action onClick={e => onSelect(s)} className="text-muted lead" key={i}>
-                  {s}
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          </Col>
-        </Row>
+        {catalogue?.loading && !catalogue?.entities?.length && (
+          <>
+            <Row className="text-center mb-2">
+              <Col className="text-muted lead">Searching for Publications...</Col>
+            </Row>
+            <Row className="text-center mb-5">
+              <Col>
+                <Spinner animation="grow" variant="secondary" role="status">
+                  <span className="sr-only">Loading...</span>
+                </Spinner>
+              </Col>
+            </Row>
+          </>
+        )}
+        {!catalogue?.loading && !catalogue?.entities?.length && (
+          <>
+            <Row className="text-center mb-2">
+              <Col className="text-muted lead">Welcome!</Col>
+            </Row>
+            <Row className="text-center mb-5">
+              <Col className="text-muted small">It looks like you haven't written anything yet...</Col>
+            </Row>
+            <Row className="text-center">
+              <Col className="text-muted lead">
+                <LinkContainer className="mb-5" to="/account/new">
+                  <Button size="lg" variant="outline-primary">
+                    Start a New Publication
+                  </Button>
+                </LinkContainer>{' '}
+              </Col>
+            </Row>
+          </>
+        )}
+        {!catalogue?.loading && !!catalogue?.entities?.length && (
+          <>
+            <Row>
+              <Col xs={0} md={2}></Col>
+              <Col xs={6} md={4}>
+                <div className="text-muted lead">
+                  By: <ExternalLink href={'https://etherscan.io/address/' + identity.state?.ethereum_address}>{me}</ExternalLink>
+                </div>
+              </Col>
+              <Col xs={0} md={1}></Col>
+              <Col xs={6} md={3} className="text-right">
+                <LinkContainer className="mb-5" to="/account/new">
+                  <Button size="sm" variant="outline-primary">
+                    New Publication
+                  </Button>
+                </LinkContainer>{' '}
+              </Col>
+            </Row>
+            <Row>
+              <Col xs={0} md={2}></Col>
+              <Col xs={0} md={8} className="text-center">
+                <div>{catalogue.load_error ? 'Error loading publications: ' + catalogue.load_error.message : ''}</div>
+                <ListGroup variant="flush" className="mt-4 mb-4">
+                  {catalogue.entities.map((s, i) => (
+                    <ListGroup.Item action onClick={e => onSelect(s)} className="text-muted lead" key={i}>
+                      {s}
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              </Col>
+            </Row>
+          </>
+        )}
       </Container>
     </>
   );

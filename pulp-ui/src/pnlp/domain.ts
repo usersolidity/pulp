@@ -27,7 +27,7 @@ export type BitcloutAddress = string;
 export type FriendlyName = string;
 
 export function friendlyName(ethereum_address?: EthereumAddress, ens_alias?: EnsAlias) {
-  return ens_alias || ethereum_address ? `${ethereum_address?.slice(0, 4)}..${ethereum_address?.slice(-3)}` : '0x0000';
+  return ens_alias || ethereum_address ? `${ethereum_address?.slice(0, 5)}..${ethereum_address?.slice(-3)}` : '0x0000';
 }
 
 /**

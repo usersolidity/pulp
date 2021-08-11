@@ -31,7 +31,7 @@ export function LoginPage() {
   return (
     <>
       <Container>
-        <Row>
+        <Row hidden>
           <Col>
             <Widget id="XLkNLWgO" style={{ width: '100%', height: '600px' }} className="my-form" tooltip="Hi there! Pulp is in alpha." buttonColor="#007bff" />
           </Col>

@@ -76,7 +76,7 @@ export function ArticleForm() {
         </Row>
       </Container>
       <Form onSubmit={onSubmitForm}>
-        <Form.Group controlId="exampleForm.ControlInput1">
+        <Form.Group>
           {/* <Form.Label className="text-muted small">Title</Form.Label> */}
           <Form.Control
             size="lg"
@@ -91,7 +91,7 @@ export function ArticleForm() {
           />
         </Form.Group>
 
-        <Form.Group controlId="exampleForm.ControlInput1">
+        <Form.Group>
           {/* <Form.Label className="text-muted small">Subtitle</Form.Label> */}
           <Form.Control
             type="input"
@@ -105,7 +105,7 @@ export function ArticleForm() {
           />
         </Form.Group>
 
-        <Form.Group controlId="exampleForm.ControlInput1">
+        <Form.Group>
           {/* <Form.Label className="text-muted small">Subtitle</Form.Label> */}
           <InputGroup size="sm" className="mb-2">
             <InputGroup.Prepend>

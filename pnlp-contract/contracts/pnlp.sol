@@ -27,24 +27,24 @@ contract pnlp {
     // solution B2: encrypt(ipfs/abcasdfasdf) x N => using key accessible to each subscriber
 
     // where string is publicationName, subscribers
-    mapping(string => string[]) public subscribers;
+    // mapping(string => string[]) public subscribers;
 
     // TODO: etc...
     // where reviewerAddress, ipfsHash
     // mapping(string => mapping(string => bool)) public reviewRequests;
 
     // where string is ipfsHash, reviewerAddress
-    mapping(string => mapping(address => bool)) public reviews;
+    // mapping(string => mapping(address => bool)) public reviews;
 
     // where string is serverAddress, requiredReviewer
-    mapping(string => string[]) public requiredReviewers;
+    // mapping(string => string[]) public requiredReviewers;
 
-    function reviewArticle(string memory ipfsHash, bool approved)
-        public
-    {
-        // TODO:etc...
-        reviews[ipfsHash][msg.sender] = approved;
-    }
+    // function reviewArticle(string memory ipfsHash, bool approved)
+    //     public
+    // {
+    //     // TODO:etc...
+    //     reviews[ipfsHash][msg.sender] = approved;
+    // }
 
     /// END HackFS Comments from conversation between Dan/Brahma
 
