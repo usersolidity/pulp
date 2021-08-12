@@ -26,13 +26,14 @@ export function ReadRoot() {
   // TODO:NEXT: this doesn't get called every time so we don't reload publication on route change
   useEffectOnMount(() => {
     if (publication_slug) {
+      console.log('loading: ' + publication_slug);
       dispatch(actions.loadPublication(publication_slug));
     }
   });
 
   return (
     <>
-      {publication?.entity?.founder === identity?.state?.ethereum_address ? <AdminNavBar /> : <ReadNavBar />}
+      {publication?.metadata?.publisher === identity?.state?.ethereum_address ? <AdminNavBar /> : <ReadNavBar />}
       <PageWrapper>
         <Switch>
           <Route exact path={`${url}`} component={ArticleList} />

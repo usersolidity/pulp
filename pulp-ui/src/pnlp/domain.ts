@@ -1,3 +1,5 @@
+import { BigNumber } from '@ethersproject/bignumber';
+
 export interface PnlpError {
   message: string; // TODO: this is useful in redux state but probably doesn't belong in the domain.ts. it also needs to carry more information from the Error() and not just the message
 }
@@ -9,10 +11,12 @@ export class PnlpConstant {
   public static ROOT = '/';
 }
 
+export const DEFAULT_FLOW = '385802469136';
+export const DAIx_CONTRACT_ADDRESS = '0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90';
+
 /**
  * Begin Domain
  */
-
 export type IpfsHash = string;
 export type IpnsHash = string;
 export type EthereumAddress = string;
@@ -30,6 +34,12 @@ export function friendlyName(ethereum_address?: EthereumAddress, ens_alias?: Ens
   return ens_alias || ethereum_address ? `${ethereum_address?.slice(0, 5)}..${ethereum_address?.slice(-3)}` : '0x0000';
 }
 
+export interface PublicationRecord {
+  ipnsHash: string;
+  publisher: string;
+  timestamp: BigNumber;
+}
+
 /**
  * Corresponds to an IPFS file,
  * all public Publication data lives here
@@ -43,6 +53,27 @@ export interface PublicationEntity {
   };
   properties: PublicationPropertiesEntity;
   read_function?: EthereumContractAddress; // a method by which a caller can read encrypted articles
+}
+
+export interface SubscriberList {
+  subscribers: Inflow[];
+}
+
+export interface Inflow {
+  sender: EthereumAddress;
+  receiver: EthereumAddress;
+  flowRate: string;
+}
+
+export interface ReviewEntity {
+  approved: boolean;
+  rating: number;
+  article: IpfsHash;
+}
+
+export interface ReviewRequestEntity {
+  article: IpfsHash;
+  reviewer: EthereumAddress;
 }
 
 export interface ArticleSummaryEntity {
@@ -128,7 +159,7 @@ export interface ArticleEntity {
 export interface PublicationMetadata {
   ipns: IpnsHash;
   tx: EthereumTransactionId;
-  founder: EthereumAddress;
+  publisher: EthereumAddress;
   timestamp: Date;
 }
 
@@ -136,6 +167,16 @@ export interface ArticleMetadata {
   ipfs: IpfsHash;
   tx: EthereumTransactionId;
   ipns: IpnsHash;
+}
+
+export interface ReviewMetadata {
+  tx: EthereumTransactionId;
+  timestamp: Date;
+}
+
+export interface ReviewRequestMetadata {
+  tx: EthereumTransactionId;
+  timestamp: Date;
 }
 
 export interface ArticleDto {
@@ -146,6 +187,16 @@ export interface ArticleDto {
 export interface PublicationDto {
   publication: PublicationEntity;
   metadata: PublicationMetadata;
+}
+
+export interface ReviewDto {
+  review: ReviewEntity;
+  metadata: ReviewMetadata;
+}
+
+export interface ReviewRequestDto {
+  review_request: ReviewRequestEntity;
+  metadata: ReviewMetadata;
 }
 
 export interface ArticleSlug {

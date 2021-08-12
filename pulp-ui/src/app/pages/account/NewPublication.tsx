@@ -85,7 +85,7 @@ export function NewPublication() {
             <Card>
               <Card.Body>
                 <Form onSubmit={onSubmitForm}>
-                  <Form.Group controlId="exampleForm.ControlInput1">
+                  <Form.Group>
                     <Form.Label className="text-muted small">Publication Name</Form.Label>
                     <Form.Control
                       type="input"
@@ -99,7 +99,7 @@ export function NewPublication() {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="exampleForm.ControlInput1">
+                  <Form.Group>
                     <Form.Label className="text-muted small">Tagline</Form.Label>
                     <Form.Control
                       type="input"
@@ -113,7 +113,7 @@ export function NewPublication() {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="exampleForm.ControlInput1">
+                  <Form.Group>
                     <Form.Label className="text-muted small">URL</Form.Label>
                     <InputGroup className="mb-2">
                       <Form.Control
@@ -128,7 +128,7 @@ export function NewPublication() {
                     </InputGroup>
                   </Form.Group>
 
-                  <Form.Group controlId="formBasicCheckbox">
+                  <Form.Group>
                     <Form.Check
                       className="text-muted small"
                       type="checkbox"

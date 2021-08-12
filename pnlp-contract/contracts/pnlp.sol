@@ -12,41 +12,52 @@ contract pnlp {
         uint256 timestamp;
     }
 
+    struct Review {
+        bool approved;
+        uint8 rating;
+    }
+
     mapping(string => Publication) public publications;
     mapping(string => Article) public articles;
 
-    /// BEGIN HackFS Comments from conversation from 08/04
+    // reviewerAddress, ipfsHash, requesterAddress
+    mapping(address => mapping(string => address)) public reviewRequests;
 
-    // (1) Subscriber opens Superfluid stream -> Publication
-    // (2) Author on Article Publish, create IPFS file: encrypt(ipfs/abcasdfasdf)
+    // ipfsHash, reviewerAddress
+    mapping(string => mapping(address => Review)) public reviews;
 
-    // solution A: security through obscurity (leave it in plaintext)
-    // solution A2: security through "NFT-effect" (leave it in plaintext, we don't care if people discover)
-
-    // solution B1: encrypt(ipfs/abcasdfasdf) => send the keys to each of subscribers
-    // solution B2: encrypt(ipfs/abcasdfasdf) x N => using key accessible to each subscriber
-
-    // where string is publicationName, subscribers
-    // mapping(string => string[]) public subscribers;
-
-    // TODO: etc...
-    // where reviewerAddress, ipfsHash
-    // mapping(string => mapping(string => bool)) public reviewRequests;
-
-    // where string is ipfsHash, reviewerAddress
-    // mapping(string => mapping(address => bool)) public reviews;
-
-    // where string is serverAddress, requiredReviewer
+    // serverAddress, requiredReviewer
     // mapping(string => string[]) public requiredReviewers;
 
-    // function reviewArticle(string memory ipfsHash, bool approved)
-    //     public
-    // {
-    //     // TODO:etc...
-    //     reviews[ipfsHash][msg.sender] = approved;
-    // }
+    function requestReview(string memory ipfsHash, address memory reviewer)
+        public
+    {
+        emit RequestedReview(ipfsHash, reviewer, msg.sender, block.timestamp);
+        reviewRequests[reviewer][ipfsHash] = true;
+    }
 
-    /// END HackFS Comments from conversation between Dan/Brahma
+    function reviewArticle(
+        string memory ipfsHash,
+        bool memory approved,
+        uint8 memory rating
+    ) public {
+        emit ReviewedArticle(
+            ipfsHash,
+            msg.sender,
+            approved,
+            rating,
+            block.timestamp
+        );
+
+        Review memory review = Review(approved, rating);
+        reviews[ipfsHash][msg.sender] = review;
+
+        if (
+            reviewRequests[msg.sender] && reviewRequests[msg.sender][ipfsHash]
+        ) {
+            delete reviewRequests[msg.sender][ipfsHash];
+        }
+    }
 
     event CreatedPublication(
         string publicationName,
@@ -54,9 +65,25 @@ contract pnlp {
         address publisher,
         uint256 timestamp
     );
+
     event PublishedArticle(
         string publicationName,
         address publisher,
+        uint256 timestamp
+    );
+
+    event ReviewedArticle(
+        string ipfsHash,
+        address reviewer,
+        bool approved,
+        uint8 rating,
+        uint256 timestamp
+    );
+
+    event RequestedReview(
+        string ipfsHash,
+        address reviewer,
+        address requester,
         uint256 timestamp
     );
 

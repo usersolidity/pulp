@@ -133,12 +133,12 @@ export function NewSubscription() {
             <Card>
               <Card.Body>
                 <Form onSubmit={onSubmitForm}>
-                  <Form.Group controlId="exampleForm.ControlInput1">
+                  <Form.Group>
                     <Form.Label className="text-muted small">Funding User Address</Form.Label>
                     <Form.Control type="input" disabled value={identity.state?.ethereum_address} />
                   </Form.Group>
 
-                  <Form.Group controlId="exampleForm.ControlInput1">
+                  <Form.Group>
                     <Form.Label className="text-muted small">Content Author</Form.Label>
                     <Form.Control
                       type="input"
@@ -151,7 +151,7 @@ export function NewSubscription() {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="exampleForm.ControlInput1">
+                  <Form.Group>
                     <Form.Label className="text-muted small">Subscription Amount</Form.Label>
                     <Form.Control
                       type="input"
@@ -164,7 +164,7 @@ export function NewSubscription() {
                     />
                   </Form.Group>
 
-                  <Form.Group controlId="formBasicCheckbox">
+                  <Form.Group>
                     <Form.Check
                       className="text-muted small"
                       type="checkbox"

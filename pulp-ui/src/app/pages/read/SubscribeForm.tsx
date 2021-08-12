@@ -10,7 +10,7 @@ import Row from 'react-bootstrap/Row';
 import { BsQuestionCircle } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { selectIdentity, selectPublication, selectSubscription, useAppSlice } from 'store/app-state';
+import { selectFounderFriendlyName, selectIdentity, selectPublication, selectSubscription, useAppSlice } from 'store/app-state';
 
 export function SubscribeForm() {
   const history = useHistory();
@@ -18,6 +18,7 @@ export function SubscribeForm() {
 
   const { actions } = useAppSlice();
   const subscription = useSelector(selectSubscription);
+  const founder_friendly_name = useSelector(selectFounderFriendlyName);
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();
@@ -52,7 +53,7 @@ export function SubscribeForm() {
               <Row>
                 <Col md={10}>
                   <div className="lead">Subscribe to {publication.entity.properties.title}</div>
-                  <div className="text-muted small mb-3">at 1 DAIx per Month</div>
+                  <div className="text-muted small mb-3">{publication.entity.properties.tagline}</div>
                 </Col>
                 <Col md={2} className="text-right">
                   <a href="/docs" target="_blank">
@@ -65,45 +66,21 @@ export function SubscribeForm() {
             <Card>
               <Card.Body>
                 <Form onSubmit={onSubmitForm}>
-                  {/* <Form.Group controlId="exampleForm.ControlInput1">
-                    <Form.Label className="text-muted small">Funding User Address</Form.Label>
-                    <Form.Control type="input" disabled value={identity.state?.ethereum_address} />
+                  <Form.Group>
+                    <Form.Label className="text-muted small">Subscription Rate</Form.Label>
+                    <Form.Control type="string" value="1 DAIx / month" disabled />
                   </Form.Group>
 
-                  <Form.Group controlId="exampleForm.ControlInput1">
-                    <Form.Label className="text-muted small">Content Author</Form.Label>
-                    <Form.Control
-                      type="input"
-                      placeholder="provide the address of the Author or content"
-                      onChange={e =>
-                        onChangeSubscription({
-                          recipient: e.currentTarget.value,
-                        })
-                      }
-                    />
+                  <Form.Group>
+                    <Form.Label className="text-muted small">Subscribe To</Form.Label>
+                    <Form.Control type="string" value={publication.entity.slug} disabled />
                   </Form.Group>
 
-                  <Form.Group controlId="exampleForm.ControlInput1">
-                    <Form.Label className="text-muted small">Subscription Amount</Form.Label>
-                    <Form.Control
-                      type="number"
-                      placeholder="385802469136"
-                      onChange={e =>
-                        onChangeSubscription({
-                          amount: e.currentTarget.value,
-                        })
-                      }
-                    />
+                  <Form.Group>
+                    <Form.Label className="text-muted small">Paid To</Form.Label>
+                    <Form.Control type="input" disabled value={founder_friendly_name} />
                   </Form.Group>
 
-                  <Form.Group controlId="formBasicCheckbox">
-                    <Form.Check
-                      className="text-muted small"
-                      type="checkbox"
-                      label="I confirm for the Subscription for the Author and monthly premium amount as indicate above."
-                      required
-                    />
-                  </Form.Group> */}
                   <Button variant="primary" block size="lg" type="submit">
                     Subscribe
                   </Button>

@@ -5,7 +5,7 @@ import { ExternalProvider, JsonRpcSigner, Web3Provider } from '@ethersproject/pr
 import SuperfluidSDK from '@superfluid-finance/js-sdk';
 import { PrivateKey } from '@textile/hub';
 import { BlockchainService } from 'pnlp/client';
-import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata } from 'pnlp/domain';
+import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata, SubscriberList } from 'pnlp/domain';
 import ContractJson from './pnlp.json';
 
 type WindowInstanceWithEthereum = Window &
@@ -85,24 +85,9 @@ export class MetamaskClient implements BlockchainService {
     return {
       ipns: publication.ipnsHash.replace('ipns/', ''), // TODO: we should remove the prefix from the contract
       tx: 'TODO',
-      founder: publication.publisher,
+      publisher: publication.publisher,
       timestamp: new Date(publication.timestamp.toNumber() * 1000),
     };
-  }
-
-  public async subscribe(recipient: EthereumAddress, token: EthereumAddress, flowRate: number) {
-    if (!this.superfluid_initialized) {
-      this.initializeSuperfluid();
-    }
-
-    const subscriber = await this.getAccount();
-
-    const fundingUser = this.superfluid.user({
-      address: subscriber,
-      token: token,
-    });
-
-    await fundingUser.flow({ recipient, flowRate });
   }
 
   public async publishArticle(publication_slug: string, ipfs_hash: IpfsHash): Promise<EthereumTransactionId> {
@@ -169,6 +154,52 @@ export class MetamaskClient implements BlockchainService {
     }
 
     return PrivateKey.fromRawEd25519Seed(Uint8Array.from(array));
+  }
+
+  public async subscribe(author: EthereumAddress, token: EthereumAddress, flowRate: number) {
+    if (!this.superfluid_initialized) {
+      this.initializeSuperfluid();
+    }
+
+    const subscriber_address = await this.getAccount();
+
+    const subscriber = this.superfluid.user({
+      address: subscriber_address,
+      token: token,
+    });
+
+    await subscriber.flow({ recipient: author, flowRate });
+  }
+
+  public async listSubscribers(token: EthereumAddress): Promise<SubscriberList> {
+    if (!this.superfluid_initialized) {
+      this.initializeSuperfluid();
+    }
+
+    const author_address = await this.getAccount();
+
+    const author = this.superfluid.user({
+      address: author_address,
+      token: token,
+    });
+
+    const details = await author.details();
+
+    return {
+      subscribers: details.cfa.flows.inFlows,
+    };
+  }
+
+  public async reviewArticle(ipfs_hash: IpfsHash, approved: boolean, rating: number): Promise<EthereumTransactionId> {
+    const transaction = await this.contract.functions.revewArticle(ipfs_hash, approved, rating);
+    console.debug('transaction result: ' + JSON.stringify(transaction));
+    return transaction.hash;
+  }
+
+  public async requestReview(ipfs_hash: IpfsHash, reviewer: EthereumAddress): Promise<EthereumTransactionId> {
+    const transaction = await this.contract.functions.requestReview(ipfs_hash, reviewer);
+    console.debug('transaction result: ' + JSON.stringify(transaction));
+    return transaction.hash;
   }
 
   private generateMessageForEntropy(ethereum_address: EthereumAddress, application_name: string): string {

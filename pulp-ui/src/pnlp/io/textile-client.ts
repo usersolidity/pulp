@@ -29,14 +29,19 @@ class TextileClient implements IpfsService {
     return ipns_string;
   }
 
-  public async writeData(path: string, content: Buffer, identity: PrivateKey): Promise<IpnsHash> {
+  public async writeData(path: string, content: Buffer, identity: PrivateKey): Promise<{ ipns_hash: IpnsHash; links: any }> {
     await this.initializeBucketIfNecessary(identity);
 
     // const buf = Buffer.from(JSON.stringify(content, null, 2));
     console.debug(`Writing ${content.length} bytes to ${path}`);
     await this.getSelectedBucket().pushPath(this.selectedBucketKey, path, content);
     const links_reply = await this.getSelectedBucket().links(this.selectedBucketKey);
-    return TextileClient.mapLinksToIpns(links_reply);
+    console.debug(`ipns links:`);
+    console.debug(JSON.stringify(links_reply));
+    return {
+      ipns_hash: TextileClient.mapLinksToIpns(links_reply),
+      links: links_reply,
+    };
   }
 
   // TODO: can we take the identity argument out of this for read-only operations?

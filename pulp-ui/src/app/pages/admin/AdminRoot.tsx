@@ -3,6 +3,7 @@ import { PageWrapper } from 'app/components/PageWrapper';
 import { AdminNavBar } from 'app/pages/admin/AdminNavBar';
 import { HistoryRoot } from 'app/pages/admin/history/HistoryRoot';
 import { NewArticle } from 'app/pages/admin/NewArticle/Loadable';
+import { SubscriberList } from 'app/pages/admin/SubscriberList';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useHistory, useParams, useRouteMatch } from 'react-router-dom';
@@ -30,8 +31,11 @@ export function AdminRoot() {
     }
 
     if (publication_slug) {
+      // TODO:NEXT: subscribers hang off the author, not the publication
+      // we need a way to remedy that. maybe add publication metadata onto a superfluid stream?
       dispatch(actions.loadPublication(publication_slug));
       dispatch(actions.loadSettings(publication_slug));
+      dispatch(actions.listSubscribers());
     }
   });
 
@@ -42,11 +46,9 @@ export function AdminRoot() {
         <Switch>
           <Route exact path={`${url}/write`} component={NewArticle} />
           <Route path={`${url}/history`} component={HistoryRoot} />
+          <Route path={`${url}/subscribers`} component={SubscriberList} />
           <Route path={`${url}/settings`}>
             <div>Settings</div>
-          </Route>
-          <Route path={`${url}/subscribers`}>
-            <div>Subscribers Page</div>
           </Route>
         </Switch>
       </PageWrapper>

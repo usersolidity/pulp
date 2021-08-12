@@ -65,9 +65,6 @@ To Test:
 ###### findDOMNode error on AwaitingPublication
 - findDOMNode is deprecated in StrictMode. findDOMNode was passed an instance of Transition which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here
 
-###### controlId on NewPublication
-- Warning: `controlId` is ignored on `<FormControl>` when `id` is specified.
-
 ###### component changing uncontrolled input
 - A component is changing an uncontrolled input of type input to be controlled. Input elements should not switch from uncontrolled to controlled (or vice versa). Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info:
 
