@@ -12,7 +12,7 @@ export class PnlpConstant {
 }
 
 export const DEFAULT_FLOW = '385802469136';
-export const DAIx_CONTRACT_ADDRESS = '0x88271d333C72e51516B67f5567c728E702b3eeE8';
+export const DAIx_CONTRACT_ADDRESS = '0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00';
 
 /**
  * Begin Domain
