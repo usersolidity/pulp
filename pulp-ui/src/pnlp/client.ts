@@ -33,6 +33,8 @@ export interface BlockchainService {
 
   requestReview(ipfs_hash: IpfsHash, reviewer: EthereumAddress): Promise<EthereumTransactionId>;
 
+  listReviews(ipfs_hash: IpfsHash): Promise<ReviewEntity[]>;
+
   awaitTransaction(transactionId: EthereumTransactionId): Promise<any>; //TODO: transaction result metadata
 
   getAccount(onChange?: Function): Promise<EthereumAddress>;
@@ -47,7 +49,7 @@ export interface BlockchainService {
 export interface IpfsService {
   writeData(path: string, buffer: Buffer, identity: PrivateKey): Promise<{ ipns_hash: IpnsHash; links: any }>;
 
-  catIpfsJson<T>(path: string, identity?: PrivateKey): Promise<T>;
+  catIpfsJson<T>(path: string): Promise<T>;
 
   resolveIpns(ipns_hash: IpnsHash): Promise<IpfsHash>;
 
@@ -125,19 +127,19 @@ export class PnlpClient {
   }
 
   public async loadPublication(publication_slug: string): Promise<PublicationDto> {
-    console.debug(`>>>>> fetching ${publication_slug}...`);
+    console.debug(`loadPublication: ${publication_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
-    console.debug(`>>>>> retrieved publication_record from blockchain: ${JSON.stringify(publication_record)}...`);
+    console.debug(`retrieved publication_record from blockchain: ${JSON.stringify(publication_record)}...`);
 
-    console.debug(`>>>>> going to resolve ${publication_record.ipns}...`);
-    // const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
-    console.debug(`>>>>> resolved to: ${publication_record.ipns}`);
+    console.debug(`going to resolve ipns_hash: ${publication_record.ipns}...`);
+    const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
+    console.debug(`resolved to ipfs_hash: ${ipfs_hash}`);
 
-    const path = `/ipfs/${publication_record.ipns}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`;
-    console.debug(`>>>>> cat: ${path}`);
+    const path = `/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.INDEX_FILENAME}`;
+    console.debug(`pulling data from publication path: ${path}`);
     const publication = await this.ipfs_service.catIpfsJson<PublicationEntity>(path);
-    console.debug(`>>>>> publication: ${JSON.stringify(publication)}`);
+    console.debug(`loaded publication: ${JSON.stringify(publication)}`);
 
     return {
       metadata: publication_record,
@@ -157,7 +159,7 @@ export class PnlpClient {
     return settings;
   }
 
-  public async loadPublicationSettings(publication_slug: string, identity: PrivateKey): Promise<PublicationSettingsEntity> {
+  public async loadPublicationSettings(publication_slug: string): Promise<PublicationSettingsEntity> {
     console.debug(`fetching settings for ${publication_slug}...`);
 
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
@@ -166,7 +168,7 @@ export class PnlpClient {
 
     // TODO: decrypt settings with user key
     const path = `/ipfs/${ipfs_hash}/${publication_slug}/${PnlpConstant.SETTINGS_FILENAME}`;
-    const settings = await this.ipfs_service.catIpfsJson<PublicationSettingsEntity>(path, identity);
+    const settings = await this.ipfs_service.catIpfsJson<PublicationSettingsEntity>(path);
 
     return settings;
   }
@@ -188,25 +190,36 @@ export class PnlpClient {
     const { ipns_hash } = await this.ipfs_service.writeData(article_path, article_buffer, identity);
     console.debug('ipns_address: ', ipns_hash);
 
-    const bucket_address = await this.ipfs_service.resolveIpns(ipns_hash);
-    const ipfs_address = `${bucket_address}/${article.publication_slug}/${article.slug}`;
+    console.debug(`resolving ipns_address: ${ipns_hash}`);
+    const ipfs_address = await this.ipfs_service.resolveIpns(ipns_hash);
+    console.debug(`resolved to ipfs_address: ${ipfs_address}`);
+    const article_address = `${ipfs_address}/${article.publication_slug}/${article.slug}`;
+    console.debug(`using article address: ${ipfs_address}`);
 
-    const transaction_hash = await this.blockchain_service.publishArticle(article.publication_slug, ipfs_address);
+    console.debug(`publishing article to blockchain...`);
+    const transaction_hash = await this.blockchain_service.publishArticle(article.publication_slug, article_address);
+    console.debug(`published article in transaction: ${transaction_hash}`);
 
     // update publication with new transaction ID and article slug
+    console.debug(`loading publication to update articles: ${article.publication_slug}`);
     const { publication } = await this.loadPublication(article.publication_slug);
+    console.debug(`loaded publication: ${publication.slug}`);
+
     publication.articles = publication.articles || {};
     publication.articles[article.slug] = {
       tx: transaction_hash,
       title: article.title,
-      ipfs: ipfs_address,
+      ipfs: article_address,
       author: article.author,
       subtitle: article.subtitle,
     };
 
     const publication_buffer = Buffer.from(JSON.stringify(publication, null, 2));
+
     const publication_path = `${publication.slug}/${PnlpConstant.INDEX_FILENAME}`;
-    await this.ipfs_service.writeData(publication_path, publication_buffer, identity);
+    console.debug(`writing publication back to path: ${publication_path}`);
+    const { links } = await this.ipfs_service.writeData(publication_path, publication_buffer, identity);
+    console.debug(`wrote data, see links: ${JSON.stringify(links)}`);
 
     return {
       article,
@@ -215,21 +228,34 @@ export class PnlpClient {
         ipns: ipns_hash,
         tx: transaction_hash,
       },
+      reviews: [],
     };
   }
 
   public async loadArticle(publication_slug: string, article_slug: string): Promise<ArticleDto> {
-    console.debug(`fetching article: ${publication_slug}/${article_slug}...`);
+    console.debug(`loading article: ${publication_slug}/${article_slug}...`);
 
+    console.debug(`getting publication from blockchain: ${publication_slug}...`);
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
+    console.debug(`found publication_record by founder: ${publication_record.publisher}...`);
     const ipns_hash = publication_record.ipns;
+    console.debug(`resolving ipfs_hash from ipns_hash: ${publication_record.ipns}...`);
     const ipfs_hash = await this.ipfs_service.resolveIpns(publication_record.ipns);
+    console.debug(`resolved to ipfs_hash: ${ipfs_hash}...`);
 
-    const article = await this.ipfs_service.catIpfsJson<ArticleEntity>(`/ipfs/${ipfs_hash}/${publication_slug}/${article_slug}`);
+    const path = `/ipfs/${ipfs_hash}/${publication_slug}/${article_slug}`;
+    console.debug(`loading article at path: ${path}...`);
+    const article = await this.ipfs_service.catIpfsJson<ArticleEntity>(path);
+    console.debug(`loaded article: ${article.title}`);
 
     if (!article) {
       throw new Error(`Article pulp/${publication_slug}/${article_slug} does not exist or is not visible`);
     }
+
+    // TODO: we can use Promise.all() to parallelize a lot of these requests
+    console.debug(`loading reviews for article: ${ipfs_hash}...`);
+    const reviews = await this.blockchain_service.listReviews(ipfs_hash);
+    console.debug(`loaded ${reviews.length} reviews`);
 
     return {
       article,
@@ -238,6 +264,7 @@ export class PnlpClient {
         ipns: ipns_hash,
         tx: 'not-implemented: TODO: do we need to get TransactionId in this direction?',
       },
+      reviews,
     };
   }
 
@@ -245,6 +272,7 @@ export class PnlpClient {
     console.debug(`reviewing an article: ${JSON.stringify(review)}`);
 
     const transaction_hash = await this.blockchain_service.reviewArticle(review.article, review.approved, review.rating);
+    console.debug(`review sent in transaction: ${transaction_hash}`);
 
     return {
       review,
@@ -274,10 +302,14 @@ export class PnlpClient {
   }
 
   public async subscribe(publication_slug: string, token: EthereumAddress, flow_rate: number) {
-    console.debug(`fetching ${publication_slug}...`);
+    console.debug(`subscribing to ${publication_slug} with token: ${token} at rate: ${flow_rate}...`);
 
+    console.debug(`fetching publication: ${publication_slug}...`);
     const publication_record = await this.blockchain_service.getPublication(publication_slug);
+
+    console.debug(`subscribing to publisher ${publication_record.publisher} with token: ${token} at rate: ${flow_rate}...`);
     await this.blockchain_service.subscribe(publication_record.publisher, token, flow_rate);
+    console.debug(`subscribe complete`);
 
     return publication_record;
   }

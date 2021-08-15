@@ -100,6 +100,8 @@ export interface ArticleState {
 
   entity: ArticleEntity;
   metadata?: ArticleMetadata;
+
+  reviews: ReviewEntity[];
 }
 
 export interface IdentityState {
@@ -193,6 +195,8 @@ export const initialArticleState: ArticleState = {
     subtitle: '',
     content: '',
   },
+
+  reviews: [],
 };
 
 export const initialCatalogueState: CatalogueState = {
@@ -225,6 +229,7 @@ export const initialReviewState: ReviewState = {
     approved: false,
     rating: 5,
     article: '',
+    reviewer: '',
   },
 };
 
@@ -299,7 +304,7 @@ const slice = createSlice({
       state.publication.load_error = undefined;
     },
     loadPublicationSuccess(state, action: PayloadAction<PublicationDto>) {
-      state.publication.loading = true;
+      state.publication.loading = false;
       state.publication.load_error = undefined;
       state.publication.entity = action.payload.publication;
       state.publication.metadata = action.payload.metadata;
@@ -344,6 +349,7 @@ const slice = createSlice({
       state.article.load_error = undefined;
       state.article.entity = action.payload.article;
       state.article.metadata = action.payload.metadata;
+      state.article.reviews = action.payload.reviews;
     },
     loadArticleError(state, action: PayloadAction<PnlpError>) {
       state.article.loading = false;
@@ -359,7 +365,11 @@ const slice = createSlice({
       state.article.entity = action.payload.article;
       state.article.metadata = action.payload.metadata;
     },
-    publishArticleError(state, action: PayloadAction<PnlpError>) {
+    publishArticleWriteError(state, action: PayloadAction<PnlpError>) {
+      state.article.awaiting_tx = false;
+      state.article.write_error = action.payload;
+    },
+    publishArticleTxError(state, action: PayloadAction<PnlpError>) {
       state.article.awaiting_tx = false;
       state.article.tx_error = action.payload;
     },
@@ -446,12 +456,12 @@ const slice = createSlice({
       state.review.error = undefined;
     },
     reviewArticleSuccess(state, action: PayloadAction<ReviewEntity>) {
-      state.review_requests.loading = false;
+      state.review.loading = false;
       state.review.entity = action.payload;
     },
     reviewArticleError(state, action: PayloadAction<PnlpError>) {
-      state.review_requests.loading = false;
-      state.review_requests.error = action.payload;
+      state.review.loading = false;
+      state.review.error = action.payload;
     },
     listSubscribers(state) {
       state.subscribers.loading = true;
@@ -510,6 +520,8 @@ export const selectAuthorFriendlyName = createSelector([selectDomain], appState 
 
 export const selectFounderFriendlyName = createSelector([selectDomain], appState => friendlyName(appState?.publication?.entity?.founder, appState?.publication?.founder_ens_alias));
 
+export const selectArticleUrl = createSelector([selectDomain], appState => `pnlp://${appState.publication.entity.slug}/${appState.article.entity.slug}`);
+
 export const { actions: appActions, reducer } = slice;
 
 export function throwIfUnauthorized(identity: PnlpIdentity | undefined) {
@@ -535,10 +547,10 @@ export function* createSubscription() {
   const subscription: SubscriptionState = yield select(selectSubscription);
   const publication: PublicationState = yield select(selectPublication);
   try {
-    yield pnlp_client.subscribe(publication.entity.slug, subscription.entity.recipient, parseInt(subscription.entity.amount));
+    yield pnlp_client.subscribe(publication.entity.slug, subscription.entity.token, parseInt(subscription.entity.amount));
     yield put(appActions.createSubscriptionSuccess(subscription.entity));
   } catch (err) {
-    yield put(appActions.createSubscriptionError({ message: err.message }));
+    yield put(appActions.createSubscriptionError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -610,15 +622,18 @@ export function* publishArticle() {
   const publication: PublicationState = yield select(selectPublication);
   const article: ArticleState = yield select(selectArticle);
   const identity: IdentityState = yield select(selectIdentity);
+  throwIfUnauthorized(identity?.state);
 
   try {
     const response: ArticleDto = yield pnlp_client.publishArticle(article.entity, identity!.state!.ipns_key);
     yield put(appActions.setArticleMetadata(response.metadata));
+    console.log(response.metadata.tx);
     yield pnlp_client.awaitTransaction(response.metadata.tx);
     yield put(appActions.publishArticleSuccess(response));
     yield call([history, history.push], `/read/${publication.entity.slug}/on/${article.entity.slug}`);
   } catch (err) {
-    yield put(appActions.publishArticleError({ message: err.message }));
+    console.log(err);
+    yield put(appActions.publishArticleTxError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -652,11 +667,9 @@ export function* updateSettings() {
 
 export function* loadSettings() {
   const settings: PublicationSettingsState = yield select(selectSettings);
-  const identity: IdentityState = yield select(selectIdentity);
-  throwIfUnauthorized(identity?.state);
 
   try {
-    const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug, identity!.state!.ipns_key);
+    const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug);
     yield put(appActions.loadSettingsSuccess(response));
   } catch (err) {
     yield put(appActions.loadSettingsError({ message: err.message }));
@@ -695,6 +708,7 @@ export function* appSaga() {
   yield takeLatest(appActions.listPublications.type, listPublications);
   yield takeLatest(appActions.createSubscription.type, createSubscription);
   yield takeLatest(appActions.listSubscribers.type, listSubscribers);
+  yield takeLatest(appActions.reviewArticle.type, reviewArticle);
 }
 
 export const useAppSlice = () => {

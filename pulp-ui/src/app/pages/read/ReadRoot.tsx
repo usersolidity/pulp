@@ -2,6 +2,7 @@ import { PageWrapper } from 'app/components/PageWrapper';
 import { AdminNavBar } from 'app/pages/admin/AdminNavBar';
 import { ArticleList } from 'app/pages/read/ArticleList';
 import { ArticleRead } from 'app/pages/read/ArticleRead';
+import { ArticleReview } from 'app/pages/read/ArticleReview';
 import { ReadNavBar } from 'app/pages/read/ReadNavBar';
 import { SubscribeForm } from 'app/pages/read/SubscribeForm';
 import * as React from 'react';
@@ -37,8 +38,9 @@ export function ReadRoot() {
       <PageWrapper>
         <Switch>
           <Route exact path={`${url}`} component={ArticleList} />
-          <Route path={`/read/:publication_slug/on/:article_slug`} component={ArticleRead} />
           <Route path={`/read/:publication_slug/subscribe`} component={SubscribeForm} />
+          <Route path={`/read/:publication_slug/on/:article_slug/review`} component={ArticleReview} />
+          <Route path={`/read/:publication_slug/on/:article_slug`} component={ArticleRead} />
         </Switch>
       </PageWrapper>
     </>

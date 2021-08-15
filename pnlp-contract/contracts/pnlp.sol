@@ -15,31 +15,32 @@ contract pnlp {
     struct Review {
         bool approved;
         uint8 rating;
+        address reviewer;
     }
 
     mapping(string => Publication) public publications;
     mapping(string => Article) public articles;
 
     // reviewerAddress, ipfsHash, requesterAddress
-    mapping(address => mapping(string => address)) public reviewRequests;
+    // mapping(address => mapping(string => address)) public reviewRequests;
 
-    // ipfsHash, reviewerAddress
-    mapping(string => mapping(address => Review)) public reviews;
+    // ipfsHash
+    mapping(string => Review) public reviews;
 
     // serverAddress, requiredReviewer
     // mapping(string => string[]) public requiredReviewers;
 
-    function requestReview(string memory ipfsHash, address memory reviewer)
-        public
-    {
-        emit RequestedReview(ipfsHash, reviewer, msg.sender, block.timestamp);
-        reviewRequests[reviewer][ipfsHash] = true;
-    }
+    // function requestReview(string memory ipfsHash, address memory reviewer)
+    //     public
+    // {
+    //     emit RequestedReview(ipfsHash, reviewer, msg.sender, block.timestamp);
+    //     reviewRequests[reviewer][ipfsHash] = true;
+    // }
 
     function reviewArticle(
         string memory ipfsHash,
-        bool memory approved,
-        uint8 memory rating
+        bool approved,
+        uint8 rating
     ) public {
         emit ReviewedArticle(
             ipfsHash,
@@ -49,14 +50,14 @@ contract pnlp {
             block.timestamp
         );
 
-        Review memory review = Review(approved, rating);
-        reviews[ipfsHash][msg.sender] = review;
+        Review memory review = Review(approved, rating, msg.sender);
+        reviews[ipfsHash] = review;
 
-        if (
-            reviewRequests[msg.sender] && reviewRequests[msg.sender][ipfsHash]
-        ) {
-            delete reviewRequests[msg.sender][ipfsHash];
-        }
+        // if (
+        //     reviewRequests[msg.sender] && reviewRequests[msg.sender][ipfsHash]
+        // ) {
+        //     delete reviewRequests[msg.sender][ipfsHash];
+        // }
     }
 
     event CreatedPublication(

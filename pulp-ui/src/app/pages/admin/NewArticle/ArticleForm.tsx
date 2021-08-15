@@ -7,8 +7,10 @@ import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
+import Spinner from 'react-bootstrap/Spinner';
 import { BsQuestionCircle } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { selectArticle, selectIdentity, selectPublication, useAppSlice } from 'store/app-state';
 
 export function ArticleForm() {
@@ -17,6 +19,7 @@ export function ArticleForm() {
   const publication = useSelector(selectPublication);
   const identity = useSelector(selectIdentity);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const onChangeArticle = (value: Partial<ArticleEntity>) => {
     const updated_article = {
@@ -43,6 +46,7 @@ export function ArticleForm() {
       evt.preventDefault();
     }
     dispatch(actions.publishArticle());
+    // history.push(`/read/${publication.entity.slug}/on/${article.entity.slug}`);
   };
 
   const useEffectOnMount = (effect: React.EffectCallback) => {
@@ -127,15 +131,24 @@ export function ArticleForm() {
         <Form.Group controlId="formBasicCheckbox">
           <MDEditor height={400} preview={'edit'} value={article.entity.content} onChange={(value?: string) => onChangeArticleContent(value)} />
         </Form.Group>
-
-        <div className="text-right">
-          <Button variant="outline-secondary" className="mr-3" onClick={onTogglePreview}>
-            Preview
-          </Button>
-          <Button variant="primary" type="submit">
-            Publish
-          </Button>
-        </div>
+        {article.awaiting_tx && (
+          <div className="text-muted text-right">
+            <Spinner animation="grow" variant="secondary" role="status" size="sm">
+              <span className="sr-only">Publishing...</span>
+            </Spinner>{' '}
+            Publishing to the Distributed Web...
+          </div>
+        )}
+        {!article.awaiting_tx && (
+          <div className="text-right">
+            <Button variant="outline-secondary" className="mr-3" onClick={onTogglePreview}>
+              Preview
+            </Button>
+            <Button variant="primary" type="submit">
+              Publish
+            </Button>
+          </div>
+        )}
       </Form>
     </div>
   );

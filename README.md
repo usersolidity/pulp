@@ -32,6 +32,24 @@ To Test:
 - Set Metamask blockchain to `localhost:8545`
 - Import Private Key that you copied from the `ganache` logs into Metamask
 
+### pnlp-contract
+
+If you modify the pnlp.sol contract, in `pnlp-contract` you should run:
+
+```
+truffle build
+truffle migrate
+cp build/contracts/pnlp.json ../pulp-ui/src/pnlp/io/pnlp.json
+```
+
+Deploy:
+- https://remix.ethereum.org/
+- select "Injected Web3"
+- choose the network with Metamask
+- upload contract
+- compile contract
+- deploy contract
+
 # TODO
 
 ###### Factor out url constants

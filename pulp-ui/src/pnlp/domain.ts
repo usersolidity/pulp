@@ -12,7 +12,7 @@ export class PnlpConstant {
 }
 
 export const DEFAULT_FLOW = '385802469136';
-export const DAIx_CONTRACT_ADDRESS = '0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90';
+export const DAIx_CONTRACT_ADDRESS = '0x88271d333C72e51516B67f5567c728E702b3eeE8';
 
 /**
  * Begin Domain
@@ -69,6 +69,7 @@ export interface ReviewEntity {
   approved: boolean;
   rating: number;
   article: IpfsHash;
+  reviewer: EthereumAddress;
 }
 
 export interface ReviewRequestEntity {
@@ -182,6 +183,7 @@ export interface ReviewRequestMetadata {
 export interface ArticleDto {
   metadata: ArticleMetadata;
   article: ArticleEntity;
+  reviews: ReviewEntity[];
 }
 
 export interface PublicationDto {

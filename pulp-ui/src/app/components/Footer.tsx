@@ -1,7 +1,6 @@
 import { Link } from 'app/components/Link';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { LinkContainer } from 'react-router-bootstrap';
 import { selectIdentity } from 'store/app-state';
 import styled from 'styled-components/macro';
 import { StyleConstants } from 'styles/StyleConstants';
@@ -22,9 +21,9 @@ export function Footer() {
         <Link to={{ pathname: 'https://gitcoin.co/grants/2776/pulp-network-2' }} target="_blank">
           Development Grants
         </Link>{' '}
-        <LinkContainer to={identity?.state ? '/subscription/new' : '/about'}>
-          <span>Subscribe</span>
-        </LinkContainer>{' '}
+        <Link to={{ pathname: 'https://ropsten.pulp.network/read/pulp-dev-blog' }} target="_blank">
+          Subscribe
+        </Link>{' '}
       </PageWrapper>
     </Wrapper>
   );

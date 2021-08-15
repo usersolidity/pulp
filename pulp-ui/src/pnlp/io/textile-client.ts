@@ -32,11 +32,8 @@ class TextileClient implements IpfsService {
   public async writeData(path: string, content: Buffer, identity: PrivateKey): Promise<{ ipns_hash: IpnsHash; links: any }> {
     await this.initializeBucketIfNecessary(identity);
 
-    // const buf = Buffer.from(JSON.stringify(content, null, 2));
-    console.debug(`Writing ${content.length} bytes to ${path}`);
     await this.getSelectedBucket().pushPath(this.selectedBucketKey, path, content);
     const links_reply = await this.getSelectedBucket().links(this.selectedBucketKey);
-    console.debug(`ipns links:`);
     console.debug(JSON.stringify(links_reply));
     return {
       ipns_hash: TextileClient.mapLinksToIpns(links_reply),
@@ -47,35 +44,11 @@ class TextileClient implements IpfsService {
   // TODO: can we take the identity argument out of this for read-only operations?
   public async lsIpns(path: string, identity: PrivateKey): Promise<string[]> {
     await this.initializeBucketIfNecessary(identity);
-    console.debug(`listPath: ${path}`);
     const res = await this.getSelectedBucket().listPath(this.selectedBucketKey, path);
     return res.item?.items.map(i => i.name) || [];
   }
 
-  // TODO: can we take the identity argument out of this for read-only operations?
-  // public async catPathJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
-  //   await this.initializeBucketIfNecessary(identity);
-  //   console.debug(`catPathJson: ${path}`);
-  //   const request = this.getSelectedBucket().pullPath(this.selectedBucketKey, path, { progress });
-  //   return this.convertIpfsRequestToJson(request);
-  //   // const stream = this.ipfs_client.cat(path);
-  //   // return await this.convertIpfsRequestToJson(stream);
-  // }
-
-  // TODO: can we take the identity argument out of this for read-only operations?
-  // public async catIpfsJson<T>(path: string, identity: PrivateKey, progress?: (num?: number) => void): Promise<T> {
-  //   await this.initializeBucketIfNecessary(identity);
-  //   console.debug(`pullIpfsPath: ${path}`);
-  //   // const request = this.getSelectedBucket().pullIpfsPath(path, { progress });
-  //   // return this.convertRequestToJson(request);
-  //   const stream = this.ipfs_client.cat(path);
-  //   return this.convertIpfsRequestToJson(stream);
-  // }
-
   public async catIpfsJson<T>(path: string, identity?: PrivateKey, progress?: (num?: number) => void): Promise<T> {
-    console.debug(`pullIpfsPath: ${path}`);
-    // const request = this.getSelectedBucket().pullIpfsPath(path, { progress });
-    // return this.convertRequestToJson(request);
     const stream = this.ipfs_client.cat(path);
     return this.convertIpfsRequestToJson(stream);
   }
@@ -87,9 +60,15 @@ class TextileClient implements IpfsService {
    * @param ipns_hash
    */
   public async resolveIpns(ipns_hash: IpnsHash): Promise<IpfsHash> {
+    if (ipns_hash === 'bafzbeia3lzqzzi37dn4lceyju27wfe45fwroif67o6tr2cuipajjzuhtkq') {
+      return 'bafybeibz4jrglvaskan3qfqc7kg4yuexjmhn2c7kspnfd3o7vhvtbpgvwe'; // TODO:remove this, for testing purposes only
+    }
     if (!ipns_hash) {
       throw new Error('ipns_hash required: ' + ipns_hash);
     }
+    // console.log(`resolving ipns/${ipns_hash}...`);
+    // const response = await this.ipfs_client.name.resolve(ipns_hash);
+
     const response = await axios.get(`https://${ipns_hash}.ipns.hub.textile.io/`, {
       headers: {
         Accept: 'text/html',
@@ -109,6 +88,9 @@ class TextileClient implements IpfsService {
     }
 
     return matches[1];
+    // const ipfs_hash = await this.convertIpnsResolveToString(response);
+    // console.log(`ipns/${ipns_hash} resolved to ipfs/${ipfs_hash}`);
+    // return ipfs_hash;
   }
 
   private async convertRequestToJson<T>(request: AsyncIterableIterator<Uint8Array>): Promise<T> {
@@ -131,6 +113,15 @@ class TextileClient implements IpfsService {
     const decoded = new TextDecoder('utf-8').decode(local);
     const result: T = JSON.parse(decoded);
     return result;
+  }
+
+  private async convertIpnsResolveToString(stream: AsyncIterable<string>): Promise<string> {
+    let local = '';
+
+    for await (const chunk of stream) {
+      local += chunk;
+    }
+    return local;
   }
 
   private async initializeBucketIfNecessary(identity: PrivateKey) {

@@ -5,7 +5,8 @@ import { ExternalProvider, JsonRpcSigner, Web3Provider } from '@ethersproject/pr
 import SuperfluidSDK from '@superfluid-finance/js-sdk';
 import { PrivateKey } from '@textile/hub';
 import { BlockchainService } from 'pnlp/client';
-import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata, SubscriberList } from 'pnlp/domain';
+import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata, ReviewEntity, SubscriberList } from 'pnlp/domain';
+import Web3 from 'web3';
 import ContractJson from './pnlp.json';
 
 type WindowInstanceWithEthereum = Window &
@@ -20,7 +21,7 @@ export class MetamaskClient implements BlockchainService {
   private contractAbi = ContractJson.abi;
   //contract address in ROPSTEN
   // private contractAddress: EthereumAddress = '0x5B64b955039Aca748b42fCf0942F33A3a530A0e9'; // ropsten
-  private contractAddress: EthereumAddress = '0x8C4533716A13587481d74dd44b49b43f284298D8'; // rinkeby
+  private contractAddress: EthereumAddress = '0x42bc6ca6234bb14d236e55e30b4205476c74cfc7'; // rinkeby
   //local contract address
   //private contractAddress: EthereumAddress = '0x6e7987EC732832c9bEA4712156985da2CC72018b';
 
@@ -44,7 +45,10 @@ export class MetamaskClient implements BlockchainService {
     this.signer = this.provider.getSigner();
     this.contract = new Contract(this.contractAddress, this.contractAbi, this.signer);
 
-    this.superfluid = new SuperfluidSDK.Framework({ web3: this.provider });
+    this.superfluid = new SuperfluidSDK.Framework({
+      web3: new Web3((window as WindowInstanceWithEthereum).ethereum as any),
+      tokens: ['fDAI'],
+    });
   }
 
   public async createPublication(publication_slug: string, ipns_hash: IpfsHash): Promise<EthereumTransactionId> {
@@ -85,7 +89,7 @@ export class MetamaskClient implements BlockchainService {
     return {
       ipns: publication.ipnsHash.replace('ipns/', ''), // TODO: we should remove the prefix from the contract
       tx: 'TODO',
-      publisher: publication.publisher,
+      publisher: publication.publisher.toLowerCase(),
       timestamp: new Date(publication.timestamp.toNumber() * 1000),
     };
   }
@@ -158,7 +162,7 @@ export class MetamaskClient implements BlockchainService {
 
   public async subscribe(author: EthereumAddress, token: EthereumAddress, flowRate: number) {
     if (!this.superfluid_initialized) {
-      this.initializeSuperfluid();
+      await this.initializeSuperfluid();
     }
 
     const subscriber_address = await this.getAccount();
@@ -167,6 +171,11 @@ export class MetamaskClient implements BlockchainService {
       address: subscriber_address,
       token: token,
     });
+
+    console.log('superfluid:');
+    console.log(subscriber);
+    console.log(author);
+    console.log(flowRate);
 
     await subscriber.flow({ recipient: author, flowRate });
   }
@@ -191,7 +200,7 @@ export class MetamaskClient implements BlockchainService {
   }
 
   public async reviewArticle(ipfs_hash: IpfsHash, approved: boolean, rating: number): Promise<EthereumTransactionId> {
-    const transaction = await this.contract.functions.revewArticle(ipfs_hash, approved, rating);
+    const transaction = await this.contract.functions.reviewArticle(ipfs_hash, approved, rating);
     console.debug('transaction result: ' + JSON.stringify(transaction));
     return transaction.hash;
   }
@@ -200,6 +209,28 @@ export class MetamaskClient implements BlockchainService {
     const transaction = await this.contract.functions.requestReview(ipfs_hash, reviewer);
     console.debug('transaction result: ' + JSON.stringify(transaction));
     return transaction.hash;
+  }
+
+  public async listReviews(ipfs_hash: IpfsHash): Promise<ReviewEntity[]> {
+    type EthereumReview = [boolean, number, string] & {
+      approved: boolean;
+      rating: number;
+      reviewer: string;
+    };
+    const review: EthereumReview = await this.contract.functions.reviews(ipfs_hash);
+
+    if (review.reviewer === '0x0000000000000000000000000000000000000000') {
+      return [];
+    }
+
+    return [
+      {
+        article: ipfs_hash,
+        approved: review.approved,
+        rating: review.rating,
+        reviewer: review.reviewer,
+      },
+    ];
   }
 
   private generateMessageForEntropy(ethereum_address: EthereumAddress, application_name: string): string {
