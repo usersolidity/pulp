@@ -3,6 +3,7 @@ import { NavBar } from 'app/components/NavBar/Navbar';
 import { PageWrapper } from 'app/components/PageWrapper';
 
 import { NewSubscription } from 'app/pages/subscription/NewSubscription';
+import { Bio } from 'app/pages/subscription/Bio';
 
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -38,6 +39,7 @@ export function SubscriptionRoot() {
       <PageWrapper>
         <Switch>
           <Route exact path={`${url}/new`} component={NewSubscription} />
+          <Route exact path={`${url}/bio`} component={Bio} />
         </Switch>
       </PageWrapper>
       <Footer />
