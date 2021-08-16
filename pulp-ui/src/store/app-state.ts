@@ -158,11 +158,11 @@ export const initialPublicationState: PublicationState = {
   awaiting_tx: false,
   writing: false,
   entity: {
-    slug: 'the-pulp-dev-blog',
+    slug: '',
     founder: '',
     articles: {},
     properties: {
-      title: 'The Pulp Dev Blog',
+      title: '',
       tagline: '',
       img_url: '',
       header_url: '',

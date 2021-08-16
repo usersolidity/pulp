@@ -52,6 +52,13 @@ Deploy:
 
 # TODO
 
+###### Cache react-redux state
+
+###### Detect address change
+- metamask onChange
+- propogate to identity.ethereum
+- currently `app-state` saga's yield() doesn't work with async calls
+
 ###### Factor out url constants
 - /read, /on, subscribe ...
 - /account, /admin, /auth, ...
@@ -63,8 +70,6 @@ Deploy:
 ###### Factor out contract address into environment variable
 
 ###### Factor out etherscan address into environment variable
-
-###### ArticleRead needs formatting work
 
 ###### Icons/Images
 
