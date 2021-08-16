@@ -5,7 +5,18 @@ import { ExternalProvider, JsonRpcSigner, Web3Provider } from '@ethersproject/pr
 import SuperfluidSDK from '@superfluid-finance/js-sdk';
 import { PrivateKey } from '@textile/hub';
 import { BlockchainService } from 'pnlp/client';
-import { EnsAlias, EthereumAddress, EthereumTransactionId, IpfsHash, PublicationMetadata, ReviewEntity, SubscriberList } from 'pnlp/domain';
+import {
+  EnsAlias,
+  EthereumAddress,
+  EthereumTransactionId,
+  IpfsHash,
+  IpnsHash,
+  PnlpConstant,
+  PnlpEnvironment,
+  PublicationMetadata,
+  ReviewEntity,
+  SubscriberList
+} from 'pnlp/domain';
 import Web3 from 'web3';
 import ContractJson from './pnlp.json';
 
@@ -19,11 +30,6 @@ type WindowInstanceWithEthereum = Window &
 
 export class MetamaskClient implements BlockchainService {
   private contractAbi = ContractJson.abi;
-  //contract address in ROPSTEN
-  // private contractAddress: EthereumAddress = '0x5B64b955039Aca748b42fCf0942F33A3a530A0e9'; // ropsten
-  private contractAddress: EthereumAddress = '0x42bc6ca6234bb14d236e55e30b4205476c74cfc7'; // rinkeby
-  //local contract address
-  //private contractAddress: EthereumAddress = '0x6e7987EC732832c9bEA4712156985da2CC72018b';
 
   private provider: Web3Provider;
   private signer: JsonRpcSigner;
@@ -32,7 +38,7 @@ export class MetamaskClient implements BlockchainService {
   private superfluid_initialized = false;
 
   constructor() {
-    if (!this.contractAddress) {
+    if (!PnlpEnvironment.PNLP_CONTRACT_ADDRESS) {
       throw new Error('The contractAddress for pnlp is not defined. If you see this in production, please create a github issue for the pnlp team.');
     }
 
@@ -40,10 +46,9 @@ export class MetamaskClient implements BlockchainService {
       throw new Error('Ethereum is not connected. Please download Metamask from https://metamask.io/download.html');
     }
 
-    console.debug('initializing web3 provider...');
     this.provider = new Web3Provider((window as WindowInstanceWithEthereum).ethereum);
     this.signer = this.provider.getSigner();
-    this.contract = new Contract(this.contractAddress, this.contractAbi, this.signer);
+    this.contract = new Contract(PnlpEnvironment.PNLP_CONTRACT_ADDRESS, this.contractAbi, this.signer);
 
     this.superfluid = new SuperfluidSDK.Framework({
       web3: new Web3((window as WindowInstanceWithEthereum).ethereum as any),
@@ -51,10 +56,8 @@ export class MetamaskClient implements BlockchainService {
     });
   }
 
-  public async createPublication(publication_slug: string, ipns_hash: IpfsHash): Promise<EthereumTransactionId> {
-    console.debug(`creating publication on ethereum: ${publication_slug}:${ipns_hash}`);
+  public async createPublication(publication_slug: string, ipns_hash: IpnsHash): Promise<EthereumTransactionId> {
     const transaction = await this.contract.functions.createPublication(publication_slug, ipns_hash);
-    console.debug('transaction result: ', transaction);
     return transaction.hash;
   }
 
@@ -68,27 +71,18 @@ export class MetamaskClient implements BlockchainService {
       publisher: string;
       timestamp: BigNumber;
     };
-    console.debug(`fetching publication ${publication_slug} from ethereum blockchain...`);
 
-    // TODO:ERROR_1:
-    // call revert exception (method="publications(string)", errorSignature=null, errorArgs=[null], reason=null, code=CALL_EXCEPTION, version=abi/5.0.1)
     const publication: EthereumPublication = await this.contract.functions.publications(publication_slug);
-    console.log('publication: ', publication);
     if (!publication) {
       throw new Error('Cannot get publication');
     }
 
-    // If a publication_slug does not exist, throw
-    if (publication.ipnsHash === '' && publication.publisher === '0x0000000000000000000000000000000000000000' && publication.timestamp.toHexString() === '0x00') {
+    if (publication.publisher === PnlpConstant.NULL_ETH_ADDRESS) {
       throw new Error('Publication does not exist');
     }
 
-    // TODO:PUBLICATION_AUTHOR:
-    console.debug(`found publication at ${publication.ipnsHash} published by ${publication.publisher} on ${publication.timestamp}`);
-
     return {
       ipns: publication.ipnsHash.replace('ipns/', ''), // TODO: we should remove the prefix from the contract
-      tx: 'TODO',
       publisher: publication.publisher.toLowerCase(),
       timestamp: new Date(publication.timestamp.toNumber() * 1000),
     };
@@ -99,10 +93,7 @@ export class MetamaskClient implements BlockchainService {
       throw new Error(`publication_slug (${publication_slug}) and ipfs_hash (${ipfs_hash}) are required fields`);
     }
 
-    console.debug(`creating article on ethereum: ${publication_slug}:${ipfs_hash}`);
-
     const transaction = await this.contract.functions.publishArticle(publication_slug, ipfs_hash);
-    console.debug('transaction result: ', transaction);
     return transaction.hash;
   }
 
@@ -113,10 +104,7 @@ export class MetamaskClient implements BlockchainService {
     }
 
     if (onChange) {
-      console.log('setting hook...');
       (window as WindowInstanceWithEthereum).ethereum.on('accountsChanged', function (accounts) {
-        console.log('ethereum just changed accounts...');
-        console.log(accounts);
         onChange(accounts[0]);
       });
     }
@@ -135,7 +123,6 @@ export class MetamaskClient implements BlockchainService {
 
   public async lookupEns(address: EthereumAddress): Promise<EnsAlias | undefined> {
     const ens_alias = this.provider.lookupAddress(address).catch(e => {
-      console.log("Could not communicate with ENS. This is expected if you're not on ropsten or mainnet." + e);
       return undefined;
     });
     return ens_alias;
@@ -172,11 +159,6 @@ export class MetamaskClient implements BlockchainService {
       token: token,
     });
 
-    console.log('superfluid:');
-    console.log(subscriber);
-    console.log(author);
-    console.log(flowRate);
-
     await subscriber.flow({ recipient: author, flowRate });
   }
 
@@ -201,13 +183,11 @@ export class MetamaskClient implements BlockchainService {
 
   public async reviewArticle(ipfs_hash: IpfsHash, approved: boolean, rating: number): Promise<EthereumTransactionId> {
     const transaction = await this.contract.functions.reviewArticle(ipfs_hash, approved, rating);
-    console.debug('transaction result: ' + JSON.stringify(transaction));
     return transaction.hash;
   }
 
   public async requestReview(ipfs_hash: IpfsHash, reviewer: EthereumAddress): Promise<EthereumTransactionId> {
     const transaction = await this.contract.functions.requestReview(ipfs_hash, reviewer);
-    console.debug('transaction result: ' + JSON.stringify(transaction));
     return transaction.hash;
   }
 
@@ -217,20 +197,25 @@ export class MetamaskClient implements BlockchainService {
       rating: number;
       reviewer: string;
     };
-    const review: EthereumReview = await this.contract.functions.reviews(ipfs_hash);
+    const res: EthereumReview[] = await this.contract.functions.reviews(ipfs_hash);
 
-    if (review.reviewer === '0x0000000000000000000000000000000000000000') {
+    if (res.length === 0) {
       return [];
     }
+    const reviews = res.filter(r => r.reviewer !== PnlpConstant.NULL_ETH_ADDRESS);
 
-    return [
-      {
-        article: ipfs_hash,
-        approved: review.approved,
-        rating: review.rating,
-        reviewer: review.reviewer,
-      },
-    ];
+    return Promise.all(
+      reviews.map(async r => {
+        const alias = await this.lookupEns(r.reviewer);
+        return {
+          reviewer_alias: alias,
+          article: ipfs_hash,
+          approved: r.approved,
+          rating: r.rating,
+          reviewer: r.reviewer,
+        };
+      }),
+    );
   }
 
   private generateMessageForEntropy(ethereum_address: EthereumAddress, application_name: string): string {

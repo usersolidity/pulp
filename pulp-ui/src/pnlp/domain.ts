@@ -9,10 +9,14 @@ export class PnlpConstant {
   public static SETTINGS_FILENAME = '.pnlp.author.json';
   public static RESERVED_NAMES = [PnlpConstant.INDEX_FILENAME, PnlpConstant.SETTINGS_FILENAME, '.textileseed', '.pnlp'];
   public static ROOT = '/';
+  public static NULL_ETH_ADDRESS = '0x0000000000000000000000000000000000000000';
+  public static DEFAULT_FLOW = '385802469136'; // default superfluid flow rate
 }
 
-export const DEFAULT_FLOW = '385802469136';
-export const DAIx_CONTRACT_ADDRESS = '0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00';
+export class PnlpEnvironment {
+  public static PNLP_CONTRACT_ADDRESS = '0xd5f93480d39436d052a35e36d0cddf438b26e343'; // goerli network
+  public static DAIx_CONTRACT_ADDRESS = '0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00'; // goerli network
+}
 
 /**
  * Begin Domain
@@ -70,6 +74,7 @@ export interface ReviewEntity {
   rating: number;
   article: IpfsHash;
   reviewer: EthereumAddress;
+  reviewer_alias?: EnsAlias;
 }
 
 export interface ReviewRequestEntity {
@@ -159,9 +164,9 @@ export interface ArticleEntity {
  */
 export interface PublicationMetadata {
   ipns: IpnsHash;
-  tx: EthereumTransactionId;
   publisher: EthereumAddress;
   timestamp: Date;
+  tx?: EthereumTransactionId;
 }
 
 export interface ArticleMetadata {

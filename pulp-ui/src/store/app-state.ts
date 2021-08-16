@@ -5,10 +5,10 @@ import {
   ArticleEntity,
   ArticleMetadata,
   ArticleSlug,
-  DAIx_CONTRACT_ADDRESS,
-  DEFAULT_FLOW,
   EnsAlias,
   friendlyName,
+  PnlpConstant,
+  PnlpEnvironment,
   PnlpError,
   PublicationDto,
   PublicationEntity,
@@ -147,8 +147,8 @@ export const initialSubscriptionState: SubscriptionState = {
   entity: {
     subscriber: '',
     recipient: '',
-    amount: DEFAULT_FLOW,
-    token: DAIx_CONTRACT_ADDRESS,
+    amount: PnlpConstant.DEFAULT_FLOW,
+    token: PnlpEnvironment.DAIx_CONTRACT_ADDRESS,
   },
 };
 
@@ -207,7 +207,7 @@ export const initialCatalogueState: CatalogueState = {
 
 export const initialSubscriberList: SubscriberListState = {
   loading: false,
-  requested_token: DAIx_CONTRACT_ADDRESS,
+  requested_token: PnlpEnvironment.DAIx_CONTRACT_ADDRESS,
 
   entity: {
     subscribers: [],
@@ -539,7 +539,8 @@ export function* reviewArticle() {
     yield pnlp_client.reviewArticle(review.entity);
     yield put(appActions.reviewArticleSuccess(review.entity));
   } catch (err) {
-    yield put(appActions.reviewArticleError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.reviewArticleError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -563,7 +564,8 @@ export function* listSubscribers() {
     const subscriberList: SubscriberList = yield pnlp_client.listSubscribers(subscribers.requested_token);
     yield put(appActions.listSubscribersSuccess(subscriberList));
   } catch (err) {
-    yield put(appActions.listSubscribersError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.listSubscribersError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -575,7 +577,8 @@ export function* listPublications() {
     const response: string[] = yield pnlp_client.listPublications(identity!.state!.ipns_key);
     yield put(appActions.listPublicationsSuccess(response));
   } catch (err) {
-    yield put(appActions.listPublicationsError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.listPublicationsError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -587,10 +590,10 @@ export function* createPublication() {
   try {
     const response: PublicationDto = yield pnlp_client.createPublication(publication.entity, identity!.state!.ipns_key);
     yield put(appActions.setPublicationMetadata(response.metadata));
-    yield pnlp_client.awaitTransaction(response.metadata.tx);
+    yield pnlp_client.awaitTransaction(response.metadata.tx!);
     yield put(appActions.createPublicationSuccess(response));
   } catch (err) {
-    yield put(appActions.createPublicationError({ message: err.message }));
+    yield put(appActions.createPublicationError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -603,7 +606,8 @@ export function* updatePublication() {
     const response: PublicationEntity = yield pnlp_client.updatePublication(publication.entity, identity!.state!.ipns_key);
     yield put(appActions.updatePublicationSuccess(response));
   } catch (err) {
-    yield put(appActions.updatePublicationError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.updatePublicationError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -614,7 +618,8 @@ export function* loadPublication() {
     const response: PublicationDto = yield pnlp_client.loadPublication(publication.requested_slug);
     yield put(appActions.loadPublicationSuccess(response));
   } catch (err) {
-    yield put(appActions.loadPublicationError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.loadPublicationError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -647,7 +652,8 @@ export function* loadArticle() {
     const response: ArticleDto = yield pnlp_client.loadArticle(article.requested_slug.publication_slug, article.requested_slug.article_slug);
     yield put(appActions.loadArticleSuccess(response));
   } catch (err) {
-    yield put(appActions.loadArticleError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.loadArticleError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -661,7 +667,8 @@ export function* updateSettings() {
     const response: PublicationSettingsEntity = yield pnlp_client.updatePublicationSettings(publication.entity.slug, settings.entity, identity!.state!.ipns_key);
     yield put(appActions.updateSettingsSuccess(response));
   } catch (err) {
-    yield put(appActions.updateSettingsError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.updateSettingsError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -672,7 +679,8 @@ export function* loadSettings() {
     const response: PublicationSettingsEntity = yield pnlp_client.loadPublicationSettings(settings.requested_slug);
     yield put(appActions.loadSettingsSuccess(response));
   } catch (err) {
-    yield put(appActions.loadSettingsError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.loadSettingsError({ message: JSON.stringify(err) }));
   }
 }
 
@@ -684,7 +692,8 @@ export function* loadIdentity() {
     yield put(appActions.loadEnsSuccess(alias));
     yield call([history, history.push], '/account');
   } catch (err) {
-    yield put(appActions.loadIdentityError({ message: err.message }));
+    console.error(err);
+    yield put(appActions.loadIdentityError({ message: JSON.stringify(err) }));
   }
 }
 

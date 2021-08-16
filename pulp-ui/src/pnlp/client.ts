@@ -16,7 +16,7 @@ import {
   ReviewEntity,
   ReviewRequestDto,
   ReviewRequestEntity,
-  SubscriberList
+  SubscriberList,
 } from 'pnlp/domain';
 import { PnlpIdentity } from 'pnlp/identity';
 

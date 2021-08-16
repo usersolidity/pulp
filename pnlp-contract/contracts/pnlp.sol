@@ -25,7 +25,7 @@ contract pnlp {
     // mapping(address => mapping(string => address)) public reviewRequests;
 
     // ipfsHash
-    mapping(string => Review) public reviews;
+    mapping(string => Review[]) public reviews;
 
     // serverAddress, requiredReviewer
     // mapping(string => string[]) public requiredReviewers;
@@ -50,8 +50,7 @@ contract pnlp {
             block.timestamp
         );
 
-        Review memory review = Review(approved, rating, msg.sender);
-        reviews[ipfsHash] = review;
+        reviews[ipfsHash].push(Review(approved, rating, msg.sender));
 
         // if (
         //     reviewRequests[msg.sender] && reviewRequests[msg.sender][ipfsHash]
